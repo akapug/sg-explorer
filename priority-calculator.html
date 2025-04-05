@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Priority-Based Compensation Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script>
+    // Simple password protection
+    window.onload = function() {
+      // Check if already authenticated in this session
+      if (!sessionStorage.getItem('authenticated')) {
+        checkPassword();
+      } else {
+        document.getElementById('content').style.display = 'block';
+      }
+    }
+    
+    function checkPassword() {
+      const password = prompt('Please enter the password to access this page:', '');
+      if (password === 'kj') {
+        sessionStorage.setItem('authenticated', 'true');
+        document.getElementById('content').style.display = 'block';
+      } else {
+        alert('Incorrect password. Access denied.');
+        checkPassword(); // Ask again
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    #content {
+      display: none;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 10px;
+      color: #3498db;
+      text-decoration: underline;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .control-group {
+      flex: 1;
+      min-width: 300px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .slider-container {
+      margin: 15px 0;
+    }
+    .slider-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .slider {
+      width: 100%;
+    }
+    .priority-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .priority-item {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+    }
+    .priority-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      border-radius: 3px;
+    }
+    .high-priority { background-color: #e74c3c; }
+    .normal-priority { background-color: #f39c12; }
+    .low-priority { background-color: #3498db; }
+    .results {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .results-table th, .results-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .results-table th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+    .canvas-container {
+      width: 100%;
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .preset-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .preset-button {
+      padding: 8px 15px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .preset-button:hover {
+      background-color: #2980b9;
+    }
+    .total-row td {
+      font-weight: bold;
+      border-top: 2px solid #3498db;
+    }
+  </style>
+</head>
+<body>
+  <div id="content">
+    <div class="header">
+      <h1>Priority-Based Compensation Calculator</h1>
+      <a href="index.html" class="back-link">← Back to Standard Calculator</a>
+    </div>
+    
+    <div class="controls">
+      <div class="control-group">
+        <h3>Time Commitment</h3>
+        <div class="slider-container">
+          <label class="slider-label">Hours per Week: <span id="hoursValue">10</span></label>
+          <input type="range" min="10" max="40" value="10" step="1" id="hoursSlider" class="slider">
+        </div>
+        <div class="priority-legend">
+          <div class="priority-item">
+            <div class="priority-color high-priority"></div>
+            <span>High Priority (0-10 hrs)</span>
+          </div>
+          <div class="priority-item">
+            <div class="priority-color normal-priority"></div>
+            <span>Normal Priority (10-20 hrs)</span>
+          </div>
+          <div class="priority-item">
+            <div class="priority-color low-priority"></div>
+            <span>As Available (20-40 hrs)</span>
+          </div>
+        </div>
+        <div class="preset-buttons">
+          <button class="preset-button" onclick="setPreset(10)">10 hrs/week</button>
+          <button class="preset-button" onclick="setPreset(20)">20 hrs/week</button>
+          <button class="preset-button" onclick="setPreset(30)">30 hrs/week</button>
+          <button class="preset-button" onclick="setPreset(40)">40 hrs/week</button>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <h3>Compensation</h3>
+        <div class="slider-container">
+          <label class="slider-label">Direct Cash: $<span id="directCashValue">2000</span>/month</label>
+          <input type="range" min="2000" max="8000" value="2000" step="1000" id="directCashSlider" class="slider">
+        </div>
+        <div class="slider-container">
+          <label class="slider-label">Deferred Cash: $<span id="deferredCashValue">0</span>/month</label>
+          <input type="range" min="0" max="6000" value="0" step="1000" id="deferredCashSlider" class="slider">
+        </div>
+      </div>
+    </div>
+    
+    <div class="canvas-container" id="canvas-container"></div>
+    
+    <div class="results">
+      <h3>Compensation Breakdown</h3>
+      <table class="results-table">
+        <tr>
+          <th colspan="2">Time & Priority</th>
+        </tr>
+        <tr>
+          <td>Total Hours per Week:</td>
+          <td id="totalHours">10</td>
+        </tr>
+        <tr>
+          <td>High Priority Hours (0-10):</td>
+          <td id="highPriorityHours">10</td>
+        </tr>
+        <tr>
+          <td>Normal Priority Hours (10-20):</td>
+          <td id="normalPriorityHours">0</td>
+        </tr>
+        <tr>
+          <td>As Available Hours (20-40):</td>
+          <td id="lowPriorityHours">0</td>
+        </tr>
+        <tr>
+          <td>Hours per Month:</td>
+          <td id="hoursPerMonth">40</td>
+        </tr>
+        <tr>
+          <td>Effective Hourly Rate:</td>
+          <td id="hourlyRate">$50.00/hr</td>
+        </tr>
+        
+        <tr>
+          <th colspan="2">Cash Compensation</th>
+        </tr>
+        <tr>
+          <td>Direct Cash (billed end of month):</td>
+          <td id="directCashTotal">$2,000</td>
+        </tr>
+        <tr>
+          <td>Deferred Cash (up to 90 days):</td>
+          <td id="deferredCashTotal">$0</td>
+        </tr>
+        <tr>
+          <td>Total Cash:</td>
+          <td id="totalCash">$2,000</td>
+        </tr>
+        
+        <tr>
+          <th colspan="2">Equity Bonus</th>
+        </tr>
+        <tr>
+          <td>Equity Value:</td>
+          <td id="equityValue">$0</td>
+        </tr>
+        <tr>
+          <td>Equity Percentage:</td>
+          <td id="equityPercent">0.00% of Softgen</td>
+        </tr>
+        <tr class="total-row">
+          <td>Total Value:</td>
+          <td id="totalValue">$2,000</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let hoursSlider, directCashSlider, deferredCashSlider;
+    let hoursValue, directCashValue, deferredCashValue;
+    let canvas;
+    
+    // Priority thresholds
+    const HIGH_PRIORITY_MAX = 10;
+    const NORMAL_PRIORITY_MAX = 20;
+    
+    // p5.js setup function
+    function setup() {
+      // Create canvas and place it in the container
+      canvas = createCanvas(800, 400);
+      canvas.parent('canvas-container');
+      
+      // Get DOM elements
+      hoursSlider = document.getElementById('hoursSlider');
+      directCashSlider = document.getElementById('directCashSlider');
+      deferredCashSlider = document.getElementById('deferredCashSlider');
+      
+      // Add event listeners
+      hoursSlider.addEventListener('input', updateFromHours);
+      directCashSlider.addEventListener('input', updateFromDirectCash);
+      deferredCashSlider.addEventListener('input', updateFromDeferredCash);
+      
+      // Initial update
+      updateFromHours();
+    }
+    
+    // p5.js draw function - called continuously
+    function draw() {
+      background(250);
+      drawVisualization();
+    }
+    
+    // Draw the main visualization
+    function drawVisualization() {
+      const hours = parseInt(hoursSlider.value);
+      const directCash = parseInt(directCashSlider.value);
+      const deferredCash = parseInt(deferredCashSlider.value);
+      const equityValue = calculateEquityValue(hours, deferredCash);
+      
+      // Draw hours breakdown
+      drawHoursBreakdown(hours, 50, 50, width - 100, 80);
+      
+      // Draw compensation breakdown
+      drawCompensationBreakdown(directCash, deferredCash, equityValue, 50, 180, width - 100, 150);
+    }
+    
+    // Draw the hours breakdown visualization
+    function drawHoursBreakdown(hours, x, y, w, h) {
+      push();
+      textAlign(CENTER, CENTER);
+      textSize(16);
+      fill(50);
+      text("Hours Breakdown by Priority", x + w/2, y - 20);
+      
+      // Calculate hours in each priority level
+      const highPriorityHours = Math.min(hours, HIGH_PRIORITY_MAX);
+      const normalPriorityHours = Math.min(Math.max(0, hours - HIGH_PRIORITY_MAX), NORMAL_PRIORITY_MAX - HIGH_PRIORITY_MAX);
+      const lowPriorityHours = Math.max(0, hours - NORMAL_PRIORITY_MAX);
+      
+      // Draw background bar
+      fill(220);
+      noStroke();
+      rect(x, y, w, h, 5);
+      
+      // Draw priority segments
+      const hourWidth = w / 40; // 40 is max hours
+      
+      // High priority (0-10 hours)
+      fill('#e74c3c');
+      rect(x, y, hourWidth * highPriorityHours, h, 5, 0, 0, 5);
+      
+      // Normal priority (10-20 hours)
+      if (normalPriorityHours > 0) {
+        fill('#f39c12');
+        rect(x + hourWidth * HIGH_PRIORITY_MAX, y, hourWidth * normalPriorityHours, h, 0);
+      }
+      
+      // Low priority (20-40 hours)
+      if (lowPriorityHours > 0) {
+        fill('#3498db');
+        rect(x + hourWidth * NORMAL_PRIORITY_MAX, y, hourWidth * lowPriorityHours, h, 0, 5, 5, 0);
+      }
+      
+      // Draw hour markers
+      stroke(255);
+      strokeWeight(1);
+      for (let i = 0; i <= 40; i += 10) {
+        const markerX = x + hourWidth * i;
+        line(markerX, y, markerX, y + h);
+        fill(50);
+        noStroke();
+        text(i, markerX, y + h + 15);
+      }
+      
+      // Draw current hour marker
+      stroke(50);
+      strokeWeight(2);
+      const currentX = x + hourWidth * hours;
+      line(currentX, y - 10, currentX, y + h + 10);
+      fill(50);
+      noStroke();
+      textSize(14);
+      text(hours + " hrs", currentX, y - 20);
+      
+      pop();
+    }
+    
+    // Draw the compensation breakdown visualization
+    function drawCompensationBreakdown(directCash, deferredCash, equityValue, x, y, w, h) {
+      push();
+      textAlign(CENTER, CENTER);
+      textSize(16);
+      fill(50);
+      text("Compensation Breakdown", x + w/2, y - 20);
+      
+      const totalValue = directCash + deferredCash + equityValue;
+      const directCashWidth = (directCash / totalValue) * w;
+      const deferredCashWidth = (deferredCash / totalValue) * w;
+      const equityWidth = (equityValue / totalValue) * w;
+      
+      // Draw background bar
+      fill(220);
+      noStroke();
+      rect(x, y, w, h, 5);
+      
+      // Draw segments
+      let currentX = x;
+      
+      // Direct cash
+      fill('#2ecc71');
+      rect(currentX, y, directCashWidth, h, 5, 0, 0, 5);
+      if (directCashWidth > 60) {
+        fill(255);
+        noStroke();
+        textAlign(CENTER, CENTER);
+        text("$" + formatNumber(directCash), currentX + directCashWidth/2, y + h/2);
+      }
+      currentX += directCashWidth;
+      
+      // Deferred cash
+      if (deferredCash > 0) {
+        fill('#f1c40f');
+        rect(currentX, y, deferredCashWidth, h, 0);
+        if (deferredCashWidth > 60) {
+          fill(50);
+          noStroke();
+          textAlign(CENTER, CENTER);
+          text("$" + formatNumber(deferredCash), currentX + deferredCashWidth/2, y + h/2);
+        }
+        currentX += deferredCashWidth;
+      }
+      
+      // Equity value
+      if (equityValue > 0) {
+        fill('#9b59b6');
+        rect(currentX, y, equityWidth, h, 0, 5, 5, 0);
+        if (equityWidth > 60) {
+          fill(255);
+          noStroke();
+          textAlign(CENTER, CENTER);
+          text("$" + formatNumber(equityValue), currentX + equityWidth/2, y + h/2);
+        }
+      }
+      
+      // Draw legend
+      const legendY = y + h + 30;
+      const legendSpacing = 150;
+      
+      // Direct cash legend
+      fill('#2ecc71');
+      rect(x, legendY, 20, 20, 3);
+      fill(50);
+      noStroke();
+      textAlign(LEFT, CENTER);
+      text("Direct Cash", x + 30, legendY + 10);
+      
+      // Deferred cash legend
+      fill('#f1c40f');
+      rect(x + legendSpacing, legendY, 20, 20, 3);
+      fill(50);
+      text("Deferred Cash", x + legendSpacing + 30, legendY + 10);
+      
+      // Equity legend
+      fill('#9b59b6');
+      rect(x + legendSpacing * 2, legendY, 20, 20, 3);
+      fill(50);
+      text("Equity Value", x + legendSpacing * 2 + 30, legendY + 10);
+      
+      pop();
+    }
+    
+    // Helper function to format numbers with commas
+    function formatNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    
+    // Update all values when hours slider changes
+    function updateFromHours() {
+      const hours = parseInt(hoursSlider.value);
+      document.getElementById('hoursValue').textContent = hours;
+      
+      // Calculate minimum total cash required at $50/hr
+      const minTotalCash = hours * 4 * 50; // hours/month * $50/hr
+      
+      // Set default values based on hours
+      let directCash, deferredCash;
+      
+      if (hours <= HIGH_PRIORITY_MAX) {
+        // 10 hr/week: $2k direct cash, $0 deferred
+        directCash = 2000;
+        deferredCash = 0;
+        
+        // Disable deferred cash slider for 10 hours
+        deferredCashSlider.disabled = true;
+      } else {
+        // For other hour levels, set direct cash to $2k and calculate deferred cash
+        directCash = 2000;
+        deferredCash = minTotalCash - directCash;
+        
+        // Enforce maximum deferred cash based on hours
+        const maxDeferred = getMaxDeferredCash(hours);
+        deferredCash = Math.min(maxDeferred, deferredCash);
+        
+        // If max deferred cash isn't enough, increase direct cash
+        if (directCash + deferredCash < minTotalCash) {
+          directCash = minTotalCash - deferredCash;
+        }
+        
+        // Enable deferred cash slider
+        deferredCashSlider.disabled = false;
+      }
+      
+      // Update sliders
+      directCashSlider.value = directCash;
+      deferredCashSlider.value = deferredCash;
+      
+      // Update displayed values
+      document.getElementById('directCashValue').textContent = formatNumber(directCash);
+      document.getElementById('deferredCashValue').textContent = formatNumber(deferredCash);
+      
+      // Update results
+      updateResults();
+    }
+    
+    // Update all values when direct cash slider changes
+    function updateFromDirectCash() {
+      const hours = parseInt(hoursSlider.value);
+      let directCash = parseInt(directCashSlider.value);
+      
+      // Round to nearest $1000
+      directCash = Math.round(directCash / 1000) * 1000;
+      directCash = Math.max(2000, Math.min(8000, directCash));
+      
+      // For 10 hr/week, fix at $2k direct cash, $0 deferred
+      if (hours <= HIGH_PRIORITY_MAX) {
+        directCash = 2000;
+        deferredCash = 0;
+        directCashSlider.value = directCash;
+        document.getElementById('directCashValue').textContent = formatNumber(directCash);
+        updateResults();
+        return;
+      }
+      
+      // Calculate minimum total cash required at $50/hr
+      const minTotalCash = hours * 4 * 50;
+      
+      // Limit direct cash to ensure total cash doesn't exceed the minimum required
+      directCash = Math.max(2000, Math.min(minTotalCash, directCash));
+      
+      // Calculate required deferred cash to maintain exactly the minimum total cash
+      let deferredCash = minTotalCash - directCash;
+      deferredCash = Math.round(deferredCash / 1000) * 1000;
+      
+      // Enforce maximum deferred cash based on hours
+      const maxDeferred = getMaxDeferredCash(hours);
+      deferredCash = Math.min(maxDeferred, deferredCash);
+      
+      // If max deferred cash isn't enough, increase direct cash
+      if (directCash + deferredCash < minTotalCash) {
+        directCash = minTotalCash - deferredCash;
+        directCash = Math.round(directCash / 1000) * 1000;
+      }
+      
+      // Update sliders and displayed values
+      directCashSlider.value = directCash;
+      deferredCashSlider.value = deferredCash;
+      document.getElementById('directCashValue').textContent = formatNumber(directCash);
+      document.getElementById('deferredCashValue').textContent = formatNumber(deferredCash);
+      
+      // Update results
+      updateResults();
+    }
+    
+    // Update all values when deferred cash slider changes
+    function updateFromDeferredCash() {
+      const hours = parseInt(hoursSlider.value);
+      
+      // For 10 hr/week, fix at $2k direct cash, $0 deferred
+      if (hours <= HIGH_PRIORITY_MAX) {
+        directCashSlider.value = 2000;
+        deferredCashSlider.value = 0;
+        document.getElementById('directCashValue').textContent = "2,000";
+        document.getElementById('deferredCashValue').textContent = "0";
+        updateResults();
+        return;
+      }
+      
+      let directCash = parseInt(directCashSlider.value);
+      let deferredCash = parseInt(deferredCashSlider.value);
+      
+      // Round to nearest $1000
+      deferredCash = Math.round(deferredCash / 1000) * 1000;
+      
+      // Calculate minimum total cash required at $50/hr
+      const minTotalCash = hours * 4 * 50;
+      
+      // Enforce maximum deferred cash based on hours
+      const maxDeferred = getMaxDeferredCash(hours);
+      deferredCash = Math.min(maxDeferred, deferredCash);
+      
+      // Adjust direct cash to maintain exactly the minimum total cash
+      // This ensures that increasing deferred cash decreases direct cash
+      directCash = minTotalCash - deferredCash;
+      directCash = Math.max(2000, directCash); // Ensure $2k minimum
+      directCash = Math.round(directCash / 1000) * 1000;
+      
+      // Update sliders and displayed values
+      directCashSlider.value = directCash;
+      deferredCashSlider.value = deferredCash;
+      document.getElementById('directCashValue').textContent = formatNumber(directCash);
+      document.getElementById('deferredCashValue').textContent = formatNumber(deferredCash);
+      
+      // Update results
+      updateResults();
+    }
+    
+    // Update all result values
+    function updateResults() {
+      const hours = parseInt(hoursSlider.value);
+      const directCash = parseInt(directCashSlider.value);
+      const deferredCash = parseInt(deferredCashSlider.value);
+      const hoursPerMonth = hours * 4;
+      
+      // Calculate priority hours
+      const highPriorityHours = Math.min(hours, HIGH_PRIORITY_MAX);
+      const normalPriorityHours = Math.min(Math.max(0, hours - HIGH_PRIORITY_MAX), NORMAL_PRIORITY_MAX - HIGH_PRIORITY_MAX);
+      const lowPriorityHours = Math.max(0, hours - NORMAL_PRIORITY_MAX);
+      
+      // Calculate equity
+      const equityValue = calculateEquityValue(hours, deferredCash);
+      const equityPercent = calculateEquityPercent(hours, deferredCash);
+      
+      // Calculate total value and hourly rate
+      const totalCash = directCash + deferredCash;
+      const totalValue = totalCash + equityValue;
+      const hourlyRate = totalValue / hoursPerMonth;
+      
+      // Update displayed values
+      document.getElementById('totalHours').textContent = hours;
+      document.getElementById('highPriorityHours').textContent = highPriorityHours;
+      document.getElementById('normalPriorityHours').textContent = normalPriorityHours;
+      document.getElementById('lowPriorityHours').textContent = lowPriorityHours;
+      document.getElementById('hoursPerMonth').textContent = hoursPerMonth;
+      document.getElementById('hourlyRate').textContent = '$' + hourlyRate.toFixed(2) + '/hr';
+      
+      document.getElementById('directCashTotal').textContent = '$' + formatNumber(directCash);
+      document.getElementById('deferredCashTotal').textContent = '$' + formatNumber(deferredCash);
+      document.getElementById('totalCash').textContent = '$' + formatNumber(totalCash);
+      
+      document.getElementById('equityValue').textContent = '$' + formatNumber(equityValue);
+      document.getElementById('equityPercent').textContent = equityPercent.toFixed(2) + '% of Softgen';
+      document.getElementById('totalValue').textContent = '$' + formatNumber(totalValue);
+    }
+    
+    // Calculate equity value based on hours and deferred cash
+    function calculateEquityValue(hours, deferredCash) {
+      if (hours <= HIGH_PRIORITY_MAX) return 0;
+      
+      const maxDeferred = getMaxDeferredCash(hours);
+      if (maxDeferred === 0) return 0;
+      
+      const deferredRatio = Math.min(1, deferredCash / maxDeferred);
+      
+      if (hours <= NORMAL_PRIORITY_MAX) {
+        // 20 hrs/week: up to 0.1% equity ($1k value)
+        return 1000 * deferredRatio;
+      } else if (hours <= 30) {
+        // 30 hrs/week: up to 0.2% equity ($2k value)
+        return 2000 * deferredRatio;
+      } else {
+        // 40 hrs/week: up to 0.3% equity ($3k value)
+        return 3000 * deferredRatio;
+      }
+    }
+    
+    // Calculate equity percentage based on hours and deferred cash
+    function calculateEquityPercent(hours, deferredCash) {
+      if (hours <= HIGH_PRIORITY_MAX) return 0;
+      
+      const maxDeferred = getMaxDeferredCash(hours);
+      if (maxDeferred === 0) return 0;
+      
+      const deferredRatio = Math.min(1, deferredCash / maxDeferred);
+      
+      if (hours <= NORMAL_PRIORITY_MAX) {
+        // 20 hrs/week: up to 0.1% equity
+        return 0.1 * deferredRatio;
+      } else if (hours <= 30) {
+        // 30 hrs/week: up to 0.2% equity
+        return 0.2 * deferredRatio;
+      } else {
+        // 40 hrs/week: up to 0.3% equity
+        return 0.3 * deferredRatio;
+      }
+    }
+    
+    // Get maximum deferred cash based on hours
+    function getMaxDeferredCash(hours) {
+      if (hours <= HIGH_PRIORITY_MAX) return 0;
+      if (hours <= NORMAL_PRIORITY_MAX) return 2000;
+      if (hours <= 30) return 4000;
+      return 6000;
+    }
+    
+    // Set preset hours
+    function setPreset(hours) {
+      hoursSlider.value = hours;
+      updateFromHours();
+    }
+  </script>
+</body>
+</html>

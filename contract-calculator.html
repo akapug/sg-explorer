@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contract Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Basic styling - will expand later */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    #content {
+      display: none;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    .tab-container {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      background-color: #ddd;
+      cursor: pointer;
+      border-radius: 5px 5px 0 0;
+      margin-right: 5px;
+    }
+    .tab.active {
+      background-color: #fff;
+    }
+    .tab-content {
+      display: none;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 0 5px 5px 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Calculator section styles */
+    .calculator-section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    .control-group {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .slider-container {
+      margin: 15px 0;
+    }
+    .slider {
+      width: 100%;
+      margin-top: 5px;
+    }
+    .priority-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .priority-item {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+    }
+    .priority-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      border-radius: 3px;
+    }
+    .high-priority { background-color: #e74c3c; }
+    .normal-priority { background-color: #f39c12; }
+    .low-priority { background-color: #3498db; }
+
+    .visualization {
+      height: 200px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .preset-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .preset-buttons button {
+      padding: 8px 15px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .preset-buttons button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Results table styles */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .results-table th, .results-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .results-table th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+    .total-row td {
+      font-weight: bold;
+      border-top: 2px solid #3498db;
+    }
+
+    .button-container {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .button-container button {
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .button-container button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Contract styles */
+    .contract-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .contract-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .contract-section {
+      margin-bottom: 20px;
+    }
+    .contract-section h3 {
+      margin-bottom: 10px;
+    }
+    .addendum {
+      margin-top: 40px;
+      border-top: 2px solid #3498db;
+      padding-top: 20px;
+    }
+    .addendum-section {
+      margin-left: 20px;
+      margin-bottom: 20px;
+    }
+    .editable {
+      border-bottom: 1px dashed #3498db;
+      padding: 0 5px;
+      min-width: 50px;
+      display: inline-block;
+    }
+    .editable:focus {
+      outline: none;
+      background-color: #f0f8ff;
+      border-bottom: 1px solid #3498db;
+    }
+    .signatures {
+      margin-top: 40px;
+    }
+    .signature-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .signature-block {
+      flex: 1;
+      min-width: 300px;
+    }
+    .signature-line {
+      margin-top: 10px;
+    }
+    #signature-canvas {
+      border: 1px solid #ccc;
+      background-color: #fff;
+      margin-bottom: 10px;
+    }
+    #clear-signature {
+      padding: 5px 10px;
+      background-color: #f8f9fa;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    #clear-signature:hover {
+      background-color: #e9ecef;
+    }
+
+    /* Print-specific styles */
+    @media print {
+      body {
+        background-color: white;
+      }
+      .tab-container, .calculator-section, .button-container {
+        display: none;
+      }
+      .tab-content {
+        display: block !important;
+        box-shadow: none;
+        padding: 0;
+      }
+      #contract {
+        font-size: 12pt;
+        line-height: 1.5;
+      }
+      #clear-signature {
+        display: none;
+      }
+      .editable {
+        border-bottom: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="content">
+    <h1>Softgen Compensation Calculator & Contract</h1>
+
+    <div class="tab-container">
+      <div class="tab active" onclick="switchTab('calculator')">Calculator</div>
+      <div class="tab" onclick="switchTab('contract')">Contract</div>
+    </div>
+
+    <div id="calculator" class="tab-content active">
+      <div class="calculator-section">
+        <h2>Time Commitment & Priority</h2>
+        <div class="control-group">
+          <div class="slider-container">
+            <label>Hours per Week: <span id="hoursValue">10</span></label>
+            <input type="range" min="10" max="40" value="10" step="1" id="hoursSlider" class="slider">
+          </div>
+
+          <div class="priority-legend">
+            <div class="priority-item">
+              <div class="priority-color high-priority"></div>
+              <span>High Priority (0-10 hrs)</span>
+            </div>
+            <div class="priority-item">
+              <div class="priority-color normal-priority"></div>
+              <span>Normal Priority (10-20 hrs)</span>
+            </div>
+            <div class="priority-item">
+              <div class="priority-color low-priority"></div>
+              <span>As Available (20-40 hrs)</span>
+            </div>
+          </div>
+
+          <div class="preset-buttons">
+            <button onclick="setPreset(10)">10 hrs/week</button>
+            <button onclick="setPreset(20)">20 hrs/week</button>
+            <button onclick="setPreset(30)">30 hrs/week</button>
+            <button onclick="setPreset(40)">40 hrs/week</button>
+          </div>
+        </div>
+
+        <div id="hours-visualization" class="visualization"></div>
+      </div>
+
+      <div class="calculator-section">
+        <h2>Compensation</h2>
+        <div class="control-group">
+          <div class="slider-container">
+            <label>Direct Cash: $<span id="directCashValue">2000</span>/month</label>
+            <input type="range" min="2000" max="8000" value="2000" step="1000" id="directCashSlider" class="slider">
+          </div>
+
+          <div class="slider-container">
+            <label>Deferred Cash: $<span id="deferredCashValue">0</span>/month</label>
+            <input type="range" min="0" max="6000" value="0" step="1000" id="deferredCashSlider" class="slider">
+          </div>
+        </div>
+
+        <div id="compensation-visualization" class="visualization"></div>
+      </div>
+
+      <div class="calculator-section">
+        <h2>Equity Parameters</h2>
+        <div class="control-group">
+          <div class="slider-container">
+            <label>Company Valuation: $<span id="valuationValue">1,500,000</span></label>
+            <input type="range" min="500000" max="5000000" value="1500000" step="100000" id="valuationSlider" class="slider">
+          </div>
+
+          <div class="slider-container">
+            <label>Base Equity Rate: <span id="baseEquityValue">0.25</span>% per month</label>
+            <input type="range" min="0.1" max="0.5" value="0.25" step="0.05" id="baseEquitySlider" class="slider">
+          </div>
+
+          <div class="slider-container">
+            <label>Hours Equity Rate: <span id="hoursEquityValue">0.25</span>% per 10 hrs</label>
+            <input type="range" min="0.1" max="0.5" value="0.25" step="0.05" id="hoursEquitySlider" class="slider">
+          </div>
+
+          <div class="slider-container">
+            <label>Deferred Cash Equity Rate: <span id="deferredEquityValue">0.25</span>% per $2k</label>
+            <input type="range" min="0.1" max="0.5" value="0.25" step="0.05" id="deferredEquitySlider" class="slider">
+          </div>
+        </div>
+      </div>
+
+      <div class="calculator-section">
+        <h2>Results</h2>
+        <div class="results-container">
+          <table class="results-table">
+            <tr>
+              <th colspan="2">Time & Priority</th>
+            </tr>
+            <tr>
+              <td>Total Hours per Week:</td>
+              <td id="totalHours">10</td>
+            </tr>
+            <tr>
+              <td>High Priority Hours (0-10):</td>
+              <td id="highPriorityHours">10</td>
+            </tr>
+            <tr>
+              <td>Normal Priority Hours (10-20):</td>
+              <td id="normalPriorityHours">0</td>
+            </tr>
+            <tr>
+              <td>As Available Hours (20-40):</td>
+              <td id="lowPriorityHours">0</td>
+            </tr>
+            <tr>
+              <td>Hours per Month:</td>
+              <td id="hoursPerMonth">40</td>
+            </tr>
+            <tr>
+              <td>Effective Hourly Rate:</td>
+              <td id="hourlyRate">$50.00/hr</td>
+            </tr>
+
+            <tr>
+              <th colspan="2">Cash Compensation</th>
+            </tr>
+            <tr>
+              <td>Direct Cash (billed end of month):</td>
+              <td id="directCashTotal">$2,000</td>
+            </tr>
+            <tr>
+              <td>Deferred Cash (up to 90 days):</td>
+              <td id="deferredCashTotal">$0</td>
+            </tr>
+            <tr>
+              <td>Total Cash:</td>
+              <td id="totalCash">$2,000</td>
+            </tr>
+
+            <tr>
+              <th colspan="2">Equity Bonus</th>
+            </tr>
+            <tr>
+              <td>Monthly Equity:</td>
+              <td id="monthlyEquity">0.25%</td>
+            </tr>
+            <tr>
+              <td>3-Month Equity:</td>
+              <td id="threeMonthEquity">0.75%</td>
+            </tr>
+            <tr>
+              <td>Equity Value:</td>
+              <td id="equityValue">$11,250</td>
+            </tr>
+            <tr class="total-row">
+              <td>Total Monthly Value:</td>
+              <td id="totalValue">$2,000</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="button-container">
+          <button id="update-contract-btn" onclick="updateContract()">Update Contract</button>
+          <button id="print-btn" onclick="printToPDF()">Print to PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="contract" class="tab-content">
+      <div class="contract-container">
+        <div class="contract-header">
+          <h2>Multipurpose Simple Independent Consultant Agreement</h2>
+        </div>
+
+        <div class="contract-section">
+          <p>This Agreement is entered into as of <span class="editable" id="effective-date" contenteditable="true">January 1, 2025</span> ("Effective Date"), between <span class="editable" id="client-name" contenteditable="true">Client Name</span> ("Client") and David Anderson ("Consultant"):</p>
+        </div>
+
+        <div class="contract-section">
+          <h3>1. Independent Consultant.</h3>
+          <p>Subject to the terms and conditions of this Agreement, the Client hereby engages the Consultant as an independent Consultant to perform the services set forth herein, and the Consultant hereby accepts such engagement. This Agreement shall not render the Consultant an employee, agent of, or joint venturer with the Client for any purpose. Unless arranged by mutual agreement, the Consultant is and will remain an independent Consultant in his relationship to the Client. The Client shall not be responsible for withholding taxes with respect to the Consultant's compensation hereunder. The Consultant shall lay no claim against the Client hereunder or otherwise for vacation pay, sick leave, retirement benefits, social security, worker's compensation, health or disability benefits, unemployment insurance benefits, or employee benefits of any kind.</p>
+        </div>
+
+        <div class="contract-section">
+          <h3>2. Term and Termination.</h3>
+          <p>This Agreement will commence on the signature date below and will remain in force and effect unless terminated by either party in accordance with the terms of this section or modified by additional Statement(s) of Work attached as additional addenda. Either party may terminate this Agreement (including the Statement of Work) if the other party breaches any material term of this Agreement and fails to cure such breach within ten (10) days following written notice thereof from the non-breaching party. Either party may terminate this Agreement (including the Statement of Work) at any time, for any reason or no reason, upon providing the other party with at least ten (10) calendar days written notice.</p>
+        </div>
+
+        <div class="contract-section">
+          <h3>3. Conflicts of Interest.</h3>
+          <p>The Consultant represents that he is free to enter into this Agreement, and that this engagement does not violate the terms of any agreement between the Consultant and any third party. Unless otherwise agreed, the Consultant is expressly free to perform services for other parties while performing services for the Client.</p>
+        </div>
+
+        <div class="contract-section">
+          <h3>4. Ownership of Inventions.</h3>
+          <p>To the extent that, in the course of providing the Services, Consultant jointly or solely conceives, develops, or reduces to practice any inventions, original works of authorship, developments, concepts, know-how, improvements or trade secrets, whether or not patentable or registrable under copyright or similar laws, Consultant hereby assigns all rights, titles and interest to such inventions to the Client.</p>
+        </div>
+
+        <div class="contract-section">
+          <h3>5. Avoiding Litigation.</h3>
+          <p>Any controversies arising out of the terms of this Agreement or its interpretation shall be settled in good faith by the parties themselves, or at worst in arbitration between the parties or their representatives, rather than in litigation.</p>
+        </div>
+
+        <div class="contract-section">
+          <h3>6. Entire Understanding.</h3>
+          <p>This document and any attached Appendices constitute the entire understanding and agreement of the parties, and any and all prior agreements, understandings, and representations are hereby terminated and canceled in their entirety and are of no further force and effect.</p>
+        </div>
+
+        <div class="contract-section">
+          <h3>7. Responsibilities, Intellectual Property, Compensation, Other Terms.</h3>
+          <p>The Consultant's responsibilities, rights to intellectual property produced, compensation, provisions for payment thereof, and other terms unique to specific roles are attached as one or more Statement(s) of Work Addenda. This agreement shall not go into effect without one or more validly-signed and executed Addenda, as attached. Extensions or alterations will be incorporated into this Agreement with subsequent separate Addenda.</p>
+        </div>
+
+        <div class="contract-section addendum">
+          <h3>Addendum A: Statement of Work</h3>
+          <h4 id="addendum-title">Softgen Product Experience Consulting</h4>
+
+          <div class="addendum-section">
+            <h4>1. Responsibilities.</h4>
+            <p>(a) Consultant will devote to the Client a <strong id="hours-commitment">maximum of 10 hours per week</strong> to assisting the Client as described in this Statement of Work Addendum, unless altered by mutual agreement in the form of additional Addenda to this Contract.</p>
+
+            <p>(b) Consultant will keep and report hours worked in furtherance of the goals and deliverables laid out below, in whatever form reasonably requested by the Client.</p>
+
+            <p>(c) Consultant will provide services to the Client, including but not limited to the following:</p>
+
+            <ul id="responsibilities-list">
+              <li>Product Experience consulting, providing user insights and feedback</li>
+              <li>Marketing support, including livestreams and product demonstrations</li>
+              <li>Operational support as requested</li>
+              <li>Any research, operational, development, marketing, or other tasks reasonably requested by the Client and agreed to by the Consultant</li>
+            </ul>
+
+            <p>(d) Hours will be prioritized as follows:</p>
+            <ul id="priority-list">
+              <li><strong>High Priority (0-10 hours/week):</strong> Meetings, immediate responses, and critical tasks</li>
+              <li><strong>Normal Priority (10-20 hours/week):</strong> Regular work and ongoing projects</li>
+              <li><strong>As Available (20-40 hours/week):</strong> Work that can be completed when other priorities allow</li>
+            </ul>
+          </div>
+
+          <div class="addendum-section">
+            <h4>2. Compensation.</h4>
+
+            <p>(a) <strong>Cash Compensation:</strong> Client will provide Consultant with the following cash compensation:</p>
+            <ul>
+              <li><strong>Direct Cash:</strong> <span id="contract-direct-cash">$2,000</span> per month, payable upon invoice receipt</li>
+              <li><strong>Deferred Cash:</strong> <span id="contract-deferred-cash">$0</span> per month, payable within 90 days</li>
+            </ul>
+
+            <p>(b) <strong>Equity Compensation:</strong> Client will provide Consultant with the following equity compensation:</p>
+            <ul>
+              <li><strong>Monthly Equity:</strong> <span id="contract-monthly-equity">0.25%</span> of the company per month</li>
+              <li><strong>Projected 3-Month Equity:</strong> <span id="contract-three-month-equity">0.75%</span> of the company</li>
+              <li><strong>Company Valuation:</strong> <span id="contract-valuation">$1,500,000</span> (for equity value calculation)</li>
+            </ul>
+
+            <p>(c) <strong>Equity Terms:</strong> Equity will vest monthly with no cliff. The equity percentage is calculated based on:</p>
+            <ul>
+              <li>Base equity of <span id="contract-base-equity-rate">0.25%</span> per month at 10 hours/week</li>
+              <li>Additional <span id="contract-hours-equity-rate">0.25%</span> per 10 hours/week beyond the initial 10 hours</li>
+              <li>Additional <span id="contract-deferred-equity-rate">0.25%</span> per $2,000 of deferred cash</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="contract-section signatures">
+          <h3>IN WITNESS WHEREOF, the Parties have caused this Agreement to be executed as of the Effective Date.</h3>
+
+          <div class="signature-container">
+            <div class="signature-block">
+              <p><strong>Consultant:</strong> David Anderson</p>
+              <div class="signature-line">
+                <p>Signature: ____________________________</p>
+                <p>Date: <span id="consultant-date" class="editable" contenteditable="true">January 1, 2025</span></p>
+              </div>
+            </div>
+
+            <div class="signature-block">
+              <p><strong>Client:</strong> <span id="client-name-signature" class="editable" contenteditable="true">Client Name</span></p>
+              <div class="signature-line">
+                <p>Signature:</p>
+                <div id="signature-area">
+                  <canvas id="signature-canvas" width="300" height="100"></canvas>
+                  <button id="clear-signature" type="button">Clear Signature</button>
+                </div>
+                <p>Date: <span id="client-date" class="editable" contenteditable="true">January 1, 2025</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple password protection
+    window.onload = function() {
+      // Check if already authenticated in this session
+      if (!sessionStorage.getItem('authenticated')) {
+        checkPassword();
+      } else {
+        document.getElementById('content').style.display = 'block';
+        initCalculator();
+      }
+    }
+
+    function checkPassword() {
+      const password = prompt('Please enter the password to access this page:', '');
+      if (password === 'kj') {
+        sessionStorage.setItem('authenticated', 'true');
+        document.getElementById('content').style.display = 'block';
+        initCalculator();
+      } else {
+        alert('Incorrect password. Access denied.');
+        checkPassword(); // Ask again
+      }
+    }
+
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabName).classList.add('active');
+      document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+
+      // If switching to contract tab, update contract with current values
+      if (tabName === 'contract') {
+        updateContract();
+      }
+    }
+
+    // Initialize calculator
+    function initCalculator() {
+      // Get DOM elements
+      const hoursSlider = document.getElementById('hoursSlider');
+      const directCashSlider = document.getElementById('directCashSlider');
+      const deferredCashSlider = document.getElementById('deferredCashSlider');
+      const valuationSlider = document.getElementById('valuationSlider');
+      const baseEquitySlider = document.getElementById('baseEquitySlider');
+      const hoursEquitySlider = document.getElementById('hoursEquitySlider');
+      const deferredEquitySlider = document.getElementById('deferredEquitySlider');
+
+      // Add event listeners
+      hoursSlider.addEventListener('input', updateFromHours);
+      directCashSlider.addEventListener('input', updateFromDirectCash);
+      deferredCashSlider.addEventListener('input', updateFromDeferredCash);
+      valuationSlider.addEventListener('input', updateResults);
+      baseEquitySlider.addEventListener('input', updateResults);
+      hoursEquitySlider.addEventListener('input', updateResults);
+      deferredEquitySlider.addEventListener('input', updateResults);
+
+      // Initialize signature canvas
+      initSignatureCanvas();
+
+      // Initial update
+      updateFromHours();
+    }
+
+    // Helper function to format numbers with commas
+    function formatNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Helper function to round to nearest thousand
+    function roundToThousand(value) {
+      return Math.round(value / 1000) * 1000;
+    }
+
+    // Get maximum deferred cash based on hours
+    function getMaxDeferredCash(hours) {
+      if (hours <= 10) return 0;
+      if (hours <= 20) return 2000;
+      if (hours <= 30) return 4000;
+      return 6000;
+    }
+
+    // Get minimum total cash required
+    function getMinTotalCash(hours) {
+      return hours * 4 * 50; // hours/month * $50/hr
+    }
+
+    // Update all values when hours slider changes
+    function updateFromHours() {
+      // Round to nearest valid hour value (10, 20, 30, 40)
+      let hours = Math.round(parseFloat(document.getElementById('hoursSlider').value) / 10) * 10;
+      hours = Math.max(10, Math.min(40, hours));
+      document.getElementById('hoursSlider').value = hours;
+      document.getElementById('hoursValue').textContent = hours;
+
+      // Calculate minimum total cash required at $50/hr
+      const minTotalCash = getMinTotalCash(hours);
+
+      // Set default values based on hours
+      let directCash, deferredCash;
+
+      if (hours <= 10) {
+        // 10 hr/week: $2k direct cash, $0 deferred
+        directCash = 2000;
+        deferredCash = 0;
+
+        // Disable deferred cash slider for 10 hours
+        document.getElementById('deferredCashSlider').disabled = true;
+      } else {
+        // For other hour levels, set direct cash to $2k and calculate deferred cash
+        directCash = 2000;
+        deferredCash = minTotalCash - directCash;
+
+        // Enforce maximum deferred cash based on hours
+        const maxDeferred = getMaxDeferredCash(hours);
+        deferredCash = Math.min(maxDeferred, deferredCash);
+
+        // If max deferred cash isn't enough, increase direct cash
+        if (directCash + deferredCash < minTotalCash) {
+          directCash = minTotalCash - deferredCash;
+        }
+
+        // Enable deferred cash slider
+        document.getElementById('deferredCashSlider').disabled = false;
+      }
+
+      // Update sliders
+      document.getElementById('directCashSlider').value = directCash;
+      document.getElementById('directCashValue').textContent = formatNumber(directCash);
+      document.getElementById('deferredCashSlider').value = deferredCash;
+      document.getElementById('deferredCashValue').textContent = formatNumber(deferredCash);
+
+      // Update results
+      updateResults();
+    }
+
+    // Update all values when direct cash slider changes
+    function updateFromDirectCash() {
+      const hours = parseInt(document.getElementById('hoursSlider').value);
+
+      // For 10 hr/week, fix at $2k direct cash, $0 deferred
+      if (hours <= 10) {
+        document.getElementById('directCashSlider').value = 2000;
+        document.getElementById('directCashValue').textContent = '2,000';
+        document.getElementById('deferredCashSlider').value = 0;
+        document.getElementById('deferredCashValue').textContent = '0';
+        updateResults();
+        return;
+      }
+
+      // Round direct cash to nearest $1000 and enforce min/max
+      let directCash = parseInt(document.getElementById('directCashSlider').value);
+      directCash = roundToThousand(directCash);
+
+      // Calculate minimum total cash required at $50/hr
+      const minTotalCash = getMinTotalCash(hours);
+
+      // Limit direct cash to ensure total cash doesn't exceed the minimum required
+      directCash = Math.max(2000, Math.min(minTotalCash, directCash));
+
+      // Calculate required deferred cash to maintain exactly the minimum total cash
+      let deferredCash = minTotalCash - directCash;
+      deferredCash = roundToThousand(deferredCash);
+
+      // Enforce maximum deferred cash based on hours
+      const maxDeferred = getMaxDeferredCash(hours);
+      deferredCash = Math.min(maxDeferred, deferredCash);
+
+      // If max deferred cash isn't enough, increase direct cash
+      if (directCash + deferredCash < minTotalCash) {
+        directCash = minTotalCash - deferredCash;
+        directCash = roundToThousand(directCash);
+      }
+
+      // Update sliders and displayed values
+      document.getElementById('directCashSlider').value = directCash;
+      document.getElementById('directCashValue').textContent = formatNumber(directCash);
+      document.getElementById('deferredCashSlider').value = deferredCash;
+      document.getElementById('deferredCashValue').textContent = formatNumber(deferredCash);
+
+      // Update results
+      updateResults();
+    }
+
+    // Update all values when deferred cash slider changes
+    function updateFromDeferredCash() {
+      const hours = parseInt(document.getElementById('hoursSlider').value);
+
+      // For 10 hr/week, fix at $2k direct cash, $0 deferred
+      if (hours <= 10) {
+        document.getElementById('directCashSlider').value = 2000;
+        document.getElementById('directCashValue').textContent = '2,000';
+        document.getElementById('deferredCashSlider').value = 0;
+        document.getElementById('deferredCashValue').textContent = '0';
+        updateResults();
+        return;
+      }
+
+      // Round deferred cash to nearest $1000
+      let deferredCash = parseInt(document.getElementById('deferredCashSlider').value);
+      deferredCash = roundToThousand(deferredCash);
+
+      // Calculate minimum total cash required at $50/hr
+      const minTotalCash = getMinTotalCash(hours);
+
+      // Enforce maximum deferred cash based on hours
+      const maxDeferred = getMaxDeferredCash(hours);
+      deferredCash = Math.min(maxDeferred, deferredCash);
+
+      // Adjust direct cash to maintain exactly the minimum total cash
+      let directCash = minTotalCash - deferredCash;
+      directCash = Math.max(2000, directCash); // Ensure $2k minimum
+      directCash = roundToThousand(directCash);
+
+      // Update sliders and displayed values
+      document.getElementById('directCashSlider').value = directCash;
+      document.getElementById('directCashValue').textContent = formatNumber(directCash);
+      document.getElementById('deferredCashSlider').value = deferredCash;
+      document.getElementById('deferredCashValue').textContent = formatNumber(deferredCash);
+
+      // Update results
+      updateResults();
+    }
+
+    // Set preset hours
+    function setPreset(hours) {
+      document.getElementById('hoursSlider').value = hours;
+      updateFromHours();
+    }
+
+    // Calculate monthly equity percentage
+    function calculateMonthlyEquity(hours, deferredCash, baseEquityRate, hoursEquityRate, deferredEquityRate) {
+      // Base equity for minimum commitment
+      let equity = baseEquityRate;
+
+      // Additional equity for hours beyond minimum
+      equity += Math.max(0, hours - 10) / 10 * hoursEquityRate;
+
+      // Additional equity for deferred cash
+      equity += (deferredCash / 2000) * deferredEquityRate;
+
+      return equity;
+    }
+
+    // Calculate equity value based on percentage and valuation
+    function calculateEquityValue(equityPercent, valuation) {
+      return (equityPercent / 100) * valuation;
+    }
+
+    // Update all result values
+    function updateResults() {
+      // Get current values
+      const hours = parseInt(document.getElementById('hoursSlider').value);
+      const directCash = parseInt(document.getElementById('directCashSlider').value);
+      const deferredCash = parseInt(document.getElementById('deferredCashSlider').value);
+      const valuation = parseInt(document.getElementById('valuationSlider').value);
+      const baseEquityRate = parseFloat(document.getElementById('baseEquitySlider').value);
+      const hoursEquityRate = parseFloat(document.getElementById('hoursEquitySlider').value);
+      const deferredEquityRate = parseFloat(document.getElementById('deferredEquitySlider').value);
+
+      // Update equity parameter displays
+      document.getElementById('valuationValue').textContent = formatNumber(valuation);
+      document.getElementById('baseEquityValue').textContent = baseEquityRate.toFixed(2);
+      document.getElementById('hoursEquityValue').textContent = hoursEquityRate.toFixed(2);
+      document.getElementById('deferredEquityValue').textContent = deferredEquityRate.toFixed(2);
+
+      // Calculate hours breakdown
+      const hoursPerMonth = hours * 4;
+      const highPriorityHours = Math.min(hours, 10);
+      const normalPriorityHours = Math.min(Math.max(0, hours - 10), 10);
+      const lowPriorityHours = Math.max(0, hours - 20);
+
+      // Calculate equity
+      const monthlyEquityPercent = calculateMonthlyEquity(hours, deferredCash, baseEquityRate, hoursEquityRate, deferredEquityRate);
+      const threeMonthEquityPercent = monthlyEquityPercent * 3;
+      const equityValue = calculateEquityValue(monthlyEquityPercent, valuation);
+
+      // Calculate total value and hourly rate
+      const totalCash = directCash + deferredCash;
+      const totalValue = totalCash + equityValue;
+      const hourlyRate = totalValue / hoursPerMonth;
+
+      // Update displayed values - Time & Priority
+      document.getElementById('totalHours').textContent = hours;
+      document.getElementById('highPriorityHours').textContent = highPriorityHours;
+      document.getElementById('normalPriorityHours').textContent = normalPriorityHours;
+      document.getElementById('lowPriorityHours').textContent = lowPriorityHours;
+      document.getElementById('hoursPerMonth').textContent = hoursPerMonth;
+      document.getElementById('hourlyRate').textContent = '$' + hourlyRate.toFixed(2) + '/hr';
+
+      // Update displayed values - Cash Compensation
+      document.getElementById('directCashTotal').textContent = '$' + formatNumber(directCash);
+      document.getElementById('deferredCashTotal').textContent = '$' + formatNumber(deferredCash);
+      document.getElementById('totalCash').textContent = '$' + formatNumber(totalCash);
+
+      // Update displayed values - Equity Bonus
+      document.getElementById('monthlyEquity').textContent = monthlyEquityPercent.toFixed(2) + '%';
+      document.getElementById('threeMonthEquity').textContent = threeMonthEquityPercent.toFixed(2) + '%';
+      document.getElementById('equityValue').textContent = '$' + formatNumber(Math.round(equityValue));
+      document.getElementById('totalValue').textContent = '$' + formatNumber(Math.round(totalValue));
+
+      // Update visualizations
+      updateVisualizations(hours, directCash, deferredCash, equityValue);
+    }
+
+    // p5.js setup and draw functions
+    let hoursCanvas, compensationCanvas;
+    let currentHours = 10;
+    let currentDirectCash = 2000;
+    let currentDeferredCash = 0;
+    let currentEquityValue = 0;
+
+    function setup() {
+      // Create canvases for visualizations
+      hoursCanvas = createCanvas(700, 150);
+      hoursCanvas.parent('hours-visualization');
+
+      compensationCanvas = createCanvas(700, 150);
+      compensationCanvas.parent('compensation-visualization');
+
+      // Set initial values
+      updateVisualizations(currentHours, currentDirectCash, currentDeferredCash, currentEquityValue);
+    }
+
+    function draw() {
+      // This is called continuously by p5.js
+      // We'll update the visualizations only when values change
+    }
+
+    // Update visualizations using p5.js
+    function updateVisualizations(hours, directCash, deferredCash, equityValue) {
+      // Store current values
+      currentHours = hours;
+      currentDirectCash = directCash;
+      currentDeferredCash = deferredCash;
+      currentEquityValue = equityValue;
+
+      // Draw hours visualization
+      drawHoursVisualization();
+
+      // Draw compensation visualization
+      drawCompensationVisualization();
+    }
+
+    // Draw hours breakdown visualization
+    function drawHoursVisualization() {
+      // Switch to hours canvas
+      hoursCanvas.drawingContext.save();
+
+      // Clear canvas
+      clear();
+      background(250);
+
+      // Calculate hours in each priority level
+      const highPriorityHours = Math.min(currentHours, 10);
+      const normalPriorityHours = Math.min(Math.max(0, currentHours - 10), 10);
+      const lowPriorityHours = Math.max(0, currentHours - 20);
+
+      // Draw title
+      textAlign(CENTER);
+      textSize(14);
+      fill(50);
+      text('Hours Breakdown by Priority', width/2, 20);
+
+      // Draw background bar
+      fill(220);
+      noStroke();
+      rect(50, 50, width - 100, 40, 5);
+
+      // Calculate width per hour
+      const hourWidth = (width - 100) / 40;
+
+      // Draw priority segments
+      // High priority (0-10 hours)
+      fill('#e74c3c');
+      rect(50, 50, hourWidth * highPriorityHours, 40, 5, 0, 0, 5);
+
+      // Normal priority (10-20 hours)
+      if (normalPriorityHours > 0) {
+        fill('#f39c12');
+        rect(50 + hourWidth * 10, 50, hourWidth * normalPriorityHours, 40, 0);
+      }
+
+      // Low priority (20-40 hours)
+      if (lowPriorityHours > 0) {
+        fill('#3498db');
+        rect(50 + hourWidth * 20, 50, hourWidth * lowPriorityHours, 40, 0, 5, 5, 0);
+      }
+
+      // Draw hour markers
+      stroke(255);
+      strokeWeight(1);
+      for (let i = 0; i <= 40; i += 10) {
+        const markerX = 50 + hourWidth * i;
+        line(markerX, 50, markerX, 90);
+        fill(50);
+        noStroke();
+        textAlign(CENTER);
+        textSize(12);
+        text(i, markerX, 110);
+      }
+
+      // Draw current hour marker
+      stroke(50);
+      strokeWeight(2);
+      const currentX = 50 + hourWidth * currentHours;
+      line(currentX, 40, currentX, 100);
+      fill(50);
+      noStroke();
+      textAlign(CENTER);
+      textSize(14);
+      text(currentHours + ' hrs', currentX, 30);
+
+      // Draw priority labels
+      textAlign(LEFT);
+      textSize(12);
+      fill(50);
+      text('Hours per Week', 50, 130);
+
+      // Restore context
+      hoursCanvas.drawingContext.restore();
+    }
+
+    // Draw compensation breakdown visualization
+    function drawCompensationVisualization() {
+      // Switch to compensation canvas
+      compensationCanvas.drawingContext.save();
+
+      // Clear canvas
+      clear();
+      background(250);
+
+      // Draw title
+      textAlign(CENTER);
+      textSize(14);
+      fill(50);
+      text('Compensation Breakdown', width/2, 20);
+
+      // Calculate total value
+      const totalValue = currentDirectCash + currentDeferredCash + currentEquityValue;
+
+      // Draw background bar
+      fill(220);
+      noStroke();
+      rect(50, 50, width - 100, 40, 5);
+
+      // Calculate widths
+      const barWidth = width - 100;
+      const directCashWidth = (currentDirectCash / totalValue) * barWidth;
+      const deferredCashWidth = (currentDeferredCash / totalValue) * barWidth;
+      const equityWidth = (currentEquityValue / totalValue) * barWidth;
+
+      // Draw segments
+      let currentX = 50;
+
+      // Direct cash
+      fill('#2ecc71');
+      rect(currentX, 50, directCashWidth, 40, 5, 0, 0, 5);
+      if (directCashWidth > 60) {
+        fill(255);
+        noStroke();
+        textAlign(CENTER);
+        textSize(12);
+        text('$' + formatNumber(currentDirectCash), currentX + directCashWidth/2, 75);
+      }
+      currentX += directCashWidth;
+
+      // Deferred cash
+      if (currentDeferredCash > 0) {
+        fill('#f1c40f');
+        rect(currentX, 50, deferredCashWidth, 40, 0);
+        if (deferredCashWidth > 60) {
+          fill(50);
+          noStroke();
+          textAlign(CENTER);
+          textSize(12);
+          text('$' + formatNumber(currentDeferredCash), currentX + deferredCashWidth/2, 75);
+        }
+        currentX += deferredCashWidth;
+      }
+
+      // Equity value
+      if (currentEquityValue > 0) {
+        fill('#9b59b6');
+        rect(currentX, 50, equityWidth, 40, 0, 5, 5, 0);
+        if (equityWidth > 60) {
+          fill(255);
+          noStroke();
+          textAlign(CENTER);
+          textSize(12);
+          text('$' + formatNumber(Math.round(currentEquityValue)), currentX + equityWidth/2, 75);
+        }
+      }
+
+      // Draw legend
+      textAlign(LEFT);
+      textSize(12);
+
+      // Direct cash legend
+      fill('#2ecc71');
+      rect(50, 110, 15, 15, 3);
+      fill(50);
+      text('Direct Cash: $' + formatNumber(currentDirectCash), 75, 122);
+
+      // Deferred cash legend
+      fill('#f1c40f');
+      rect(250, 110, 15, 15, 3);
+      fill(50);
+      text('Deferred Cash: $' + formatNumber(currentDeferredCash), 275, 122);
+
+      // Equity legend
+      fill('#9b59b6');
+      rect(450, 110, 15, 15, 3);
+      fill(50);
+      text('Equity Value: $' + formatNumber(Math.round(currentEquityValue)), 475, 122);
+
+      // Restore context
+      compensationCanvas.drawingContext.restore();
+    }
+
+    // Update contract with current values
+    function updateContract() {
+      // Get current values
+      const hours = parseInt(document.getElementById('hoursSlider').value);
+      const directCash = parseInt(document.getElementById('directCashSlider').value);
+      const deferredCash = parseInt(document.getElementById('deferredCashSlider').value);
+      const valuation = parseInt(document.getElementById('valuationSlider').value);
+      const baseEquityRate = parseFloat(document.getElementById('baseEquitySlider').value);
+      const hoursEquityRate = parseFloat(document.getElementById('hoursEquitySlider').value);
+      const deferredEquityRate = parseFloat(document.getElementById('deferredEquitySlider').value);
+
+      // Calculate equity
+      const monthlyEquityPercent = calculateMonthlyEquity(hours, deferredCash, baseEquityRate, hoursEquityRate, deferredEquityRate);
+      const threeMonthEquityPercent = monthlyEquityPercent * 3;
+
+      // Update hours commitment
+      document.getElementById('hours-commitment').textContent = `maximum of ${hours} hours per week`;
+
+      // Update priority list
+      const priorityList = document.getElementById('priority-list');
+      priorityList.innerHTML = '';
+
+      const highPriorityHours = Math.min(hours, 10);
+      const normalPriorityHours = Math.min(Math.max(0, hours - 10), 10);
+      const lowPriorityHours = Math.max(0, hours - 20);
+
+      if (highPriorityHours > 0) {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>High Priority (${highPriorityHours} hours/week):</strong> Meetings, immediate responses, and critical tasks`;
+        priorityList.appendChild(li);
+      }
+
+      if (normalPriorityHours > 0) {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>Normal Priority (${normalPriorityHours} hours/week):</strong> Regular work and ongoing projects`;
+        priorityList.appendChild(li);
+      }
+
+      if (lowPriorityHours > 0) {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>As Available (${lowPriorityHours} hours/week):</strong> Work that can be completed when other priorities allow`;
+        priorityList.appendChild(li);
+      }
+
+      // Update compensation values
+      document.getElementById('contract-direct-cash').textContent = '$' + formatNumber(directCash);
+      document.getElementById('contract-deferred-cash').textContent = '$' + formatNumber(deferredCash);
+      document.getElementById('contract-monthly-equity').textContent = monthlyEquityPercent.toFixed(2) + '%';
+      document.getElementById('contract-three-month-equity').textContent = threeMonthEquityPercent.toFixed(2) + '%';
+      document.getElementById('contract-valuation').textContent = '$' + formatNumber(valuation);
+
+      // Update equity rate values
+      document.getElementById('contract-base-equity-rate').textContent = baseEquityRate.toFixed(2) + '%';
+      document.getElementById('contract-hours-equity-rate').textContent = hoursEquityRate.toFixed(2) + '%';
+      document.getElementById('contract-deferred-equity-rate').textContent = deferredEquityRate.toFixed(2) + '%';
+
+      // Ensure client name is consistent
+      const clientName = document.getElementById('client-name').textContent;
+      document.getElementById('client-name-signature').textContent = clientName;
+    }
+
+    // Initialize signature canvas
+    function initSignatureCanvas() {
+      const canvas = document.getElementById('signature-canvas');
+      if (!canvas) return; // Canvas might not be loaded yet
+
+      const ctx = canvas.getContext('2d');
+      let isDrawing = false;
+
+      // Clear button
+      const clearButton = document.getElementById('clear-signature');
+      clearButton.addEventListener('click', function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+
+      // Mouse events
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+
+      // Touch events for mobile
+      canvas.addEventListener('touchstart', handleTouch);
+      canvas.addEventListener('touchmove', handleTouch);
+      canvas.addEventListener('touchend', stopDrawing);
+
+      function handleTouch(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 'mousemove', {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+      }
+
+      function startDrawing(e) {
+        isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+
+        ctx.lineTo(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
+      }
+
+      function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+      }
+    }
+
+    // Print to PDF function
+    function printToPDF() {
+      // Switch to contract tab
+      switchTab('contract');
+
+      // Wait a moment for the tab to fully render
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    }
+  </script>
+</body>
+</html>

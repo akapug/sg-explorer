@@ -184,10 +184,27 @@
       font-weight: bold;
     }
 
+    .results-container {
+      margin-top: 20px;
+    }
+
     .results-grid {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .results-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    .results-box {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     .total-row td {
       font-weight: bold;
@@ -402,63 +419,73 @@
         <h2>Results</h2>
         <div class="results-container">
           <div class="results-grid">
-            <table class="results-table">
-              <tr>
-                <th colspan="3">Priority Breakdown & Equity</th>
-              </tr>
-              <tr>
-                <td>High Priority (0-10 hrs/week):</td>
-                <td>10 hrs/week</td>
-                <td id="equity-10hrs">0.20%</td>
-              </tr>
-              <tr>
-                <td>Normal Priority (10-20 hrs/week):</td>
-                <td>10 hrs/week</td>
-                <td id="equity-20hrs">0.40%</td>
-              </tr>
-              <tr>
-                <td>As Available (20-40 hrs/week):</td>
-                <td>20 hrs/week</td>
-                <td id="equity-30hrs">0.60%</td>
-              </tr>
-              <tr>
-                <td>Total (at 40 hrs/week):</td>
-                <td id="hoursPerMonth">160 hrs/month</td>
-                <td id="equity-40hrs">0.80%</td>
-              </tr>
+            <div class="results-box">
+              <table class="results-table">
+                <tr>
+                  <th colspan="3">Priority Breakdown & Equity</th>
+                </tr>
+                <tr>
+                  <td>High Priority (0-10 hrs/week):</td>
+                  <td>10 hrs/week</td>
+                  <td id="equity-10hrs">0.20%</td>
+                </tr>
+                <tr>
+                  <td>Normal Priority (10-20 hrs/week):</td>
+                  <td>10 hrs/week</td>
+                  <td id="equity-20hrs">0.40%</td>
+                </tr>
+                <tr>
+                  <td>As Available (20-40 hrs/week):</td>
+                  <td>20 hrs/week</td>
+                  <td id="equity-30hrs">0.60%</td>
+                </tr>
+                <tr>
+                  <td>Total (at 40 hrs/week):</td>
+                  <td id="hoursPerMonth">160 hrs/month</td>
+                  <td id="equity-40hrs">0.80%</td>
+                </tr>
+              </table>
+            </div>
 
-              <tr>
-                <th colspan="3">Cash Compensation</th>
-              </tr>
-              <tr>
-                <td>Direct Cash (billed end of month):</td>
-                <td colspan="2" id="directCashTotal">$2,000</td>
-              </tr>
-              <tr>
-                <td>Deferred Cash (up to 90 days):</td>
-                <td colspan="2" id="deferredCashTotal">$0</td>
-              </tr>
-              <tr>
-                <td>Total Cash:</td>
-                <td colspan="2" id="totalCash">$2,000</td>
-              </tr>
+            <div class="results-box">
+              <table class="results-table">
+                <tr>
+                  <th colspan="2">Cash Compensation</th>
+                </tr>
+                <tr>
+                  <td>Direct Cash (billed end of month):</td>
+                  <td id="directCashTotal">$2,000</td>
+                </tr>
+                <tr>
+                  <td>Deferred Cash (up to 90 days):</td>
+                  <td id="deferredCashTotal">$0</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Total Cash:</td>
+                  <td id="totalCash">$2,000</td>
+                </tr>
+              </table>
+            </div>
 
-              <tr>
-                <th colspan="3">Equity Bonus</th>
-              </tr>
-              <tr>
-                <td>Monthly Equity (at 40 hrs/week):</td>
-                <td colspan="2" id="monthlyEquity">0.80%</td>
-              </tr>
-              <tr>
-                <td>Total Equity Multiplier:</td>
-                <td colspan="2" id="equityMultiplier">4.0X</td>
-              </tr>
-              <tr class="total-row">
-                <td>Total Monthly Cash:</td>
-                <td colspan="2" id="totalValue">$8,000</td>
-              </tr>
-            </table>
+            <div class="results-box">
+              <table class="results-table">
+                <tr>
+                  <th colspan="2">Equity Bonus</th>
+                </tr>
+                <tr>
+                  <td>Monthly Equity (at 40 hrs/week):</td>
+                  <td id="monthlyEquity">0.80%</td>
+                </tr>
+                <tr>
+                  <td>Total Equity Multiplier:</td>
+                  <td id="equityMultiplier">4.0X</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Total Monthly Cash:</td>
+                  <td id="totalValue">$8,000</td>
+                </tr>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -552,14 +579,22 @@
 
             <p>(b) <strong>Equity Compensation:</strong> Client will provide Consultant with the following equity compensation:</p>
             <ul>
-              <li><strong>Monthly Equity:</strong> <span id="contract-monthly-equity">0.80%</span> of the company per month</li>
+              <li><strong>Monthly Equity:</strong> Up to <span id="contract-monthly-equity">0.80%</span> of the company per month at 40 hours/week</li>
             </ul>
 
-            <p>(c) <strong>Equity Terms:</strong> Equity will vest monthly with no cliff. The equity percentage is calculated based on:</p>
+            <p>(c) <strong>Equity Terms:</strong> Equity will vest monthly with no cliff. The equity percentage scales with hours worked and deferred cash as follows:</p>
             <ul>
-              <li>Base equity of <span id="contract-base-equity-rate">0.25%</span> per month at 10 hours/week</li>
-              <li>Additional <span id="contract-hours-equity-rate">0.25%</span> per 10 hours/week beyond the initial 10 hours</li>
-              <li>Additional <span id="contract-deferred-equity-rate">0.25%</span> per $2,000 of deferred cash</li>
+              <li><strong>10 hours/week:</strong> <span id="contract-equity-10hrs">0.20%</span> equity per month</li>
+              <li><strong>20 hours/week:</strong> <span id="contract-equity-20hrs">0.40%</span> equity per month</li>
+              <li><strong>30 hours/week:</strong> <span id="contract-equity-30hrs">0.60%</span> equity per month</li>
+              <li><strong>40 hours/week:</strong> <span id="contract-equity-40hrs">0.80%</span> equity per month</li>
+            </ul>
+
+            <p>(d) <strong>Equity Calculation:</strong> The equity percentage is calculated based on:</p>
+            <ul>
+              <li>Base equity of <span id="contract-base-equity-rate">0.20%</span> per month at 10 hours/week</li>
+              <li>Additional <span id="contract-hours-equity-rate">0.20%</span> per 10 additional hours/week</li>
+              <li>Additional <span id="contract-deferred-equity-rate">0.20%</span> per $2,000 of deferred cash</li>
             </ul>
           </div>
         </div>
@@ -951,9 +986,16 @@
       const hoursEquityRate = parseFloat(document.getElementById('hoursEquitySlider').value);
       const deferredEquityRate = parseFloat(document.getElementById('deferredEquitySlider').value);
 
-      // Calculate equity at 40 hours with max deferred cash
-      const maxDeferred40 = getMaxDeferredCash(40);
-      const monthlyEquityPercent = calculateMonthlyEquity(40, maxDeferred40, baseEquityRate, hoursEquityRate, deferredEquityRate);
+      // Calculate equity for each hours tier
+      const maxDeferred10 = getMaxDeferredCash(10); // 0
+      const maxDeferred20 = getMaxDeferredCash(20); // 2000
+      const maxDeferred30 = getMaxDeferredCash(30); // 4000
+      const maxDeferred40 = getMaxDeferredCash(40); // 6000
+
+      const equity10 = calculateMonthlyEquity(10, maxDeferred10, baseEquityRate, hoursEquityRate, deferredEquityRate);
+      const equity20 = calculateMonthlyEquity(20, maxDeferred20, baseEquityRate, hoursEquityRate, deferredEquityRate);
+      const equity30 = calculateMonthlyEquity(30, maxDeferred30, baseEquityRate, hoursEquityRate, deferredEquityRate);
+      const equity40 = calculateMonthlyEquity(40, maxDeferred40, baseEquityRate, hoursEquityRate, deferredEquityRate);
 
       // Update hours commitment - fixed at up to 40 hours per week
       document.getElementById('hours-commitment').textContent = 'maximum of 40 hours per week';
@@ -977,7 +1019,13 @@
       // Update compensation values
       document.getElementById('contract-direct-cash').textContent = '$' + formatNumber(directCash);
       document.getElementById('contract-deferred-cash').textContent = '$' + formatNumber(maxDeferred40);
-      document.getElementById('contract-monthly-equity').textContent = monthlyEquityPercent.toFixed(2) + '%';
+      document.getElementById('contract-monthly-equity').textContent = equity40.toFixed(2) + '%';
+
+      // Update equity values for each hours tier
+      document.getElementById('contract-equity-10hrs').textContent = equity10.toFixed(2) + '%';
+      document.getElementById('contract-equity-20hrs').textContent = equity20.toFixed(2) + '%';
+      document.getElementById('contract-equity-30hrs').textContent = equity30.toFixed(2) + '%';
+      document.getElementById('contract-equity-40hrs').textContent = equity40.toFixed(2) + '%';
 
       // Update equity rate values
       document.getElementById('contract-base-equity-rate').textContent = baseEquityRate.toFixed(2) + '%';

@@ -402,84 +402,66 @@
           <div class="results-grid">
             <table class="results-table">
               <tr>
-                <th colspan="2">Priority Breakdown</th>
+                <th colspan="3">Priority Breakdown & Equity</th>
               </tr>
               <tr>
-                <td>High Priority Hours (0-10):</td>
+                <td>High Priority (0-10 hrs/week):</td>
                 <td>10 hrs/week</td>
-              </tr>
-              <tr>
-                <td>Normal Priority Hours (10-20):</td>
-                <td>10 hrs/week</td>
-              </tr>
-              <tr>
-                <td>As Available Hours (20-40):</td>
-                <td>20 hrs/week</td>
-              </tr>
-              <tr>
-                <td>Hours per Month:</td>
-                <td id="hoursPerMonth">160</td>
-              </tr>
-
-              <tr>
-                <th colspan="2">Cash Compensation</th>
-              </tr>
-              <tr>
-                <td>Direct Cash (billed end of month):</td>
-                <td id="directCashTotal">$2,000</td>
-              </tr>
-              <tr>
-                <td>Deferred Cash (up to 90 days):</td>
-                <td id="deferredCashTotal">$0</td>
-              </tr>
-              <tr>
-                <td>Total Cash:</td>
-                <td id="totalCash">$2,000</td>
-              </tr>
-
-              <tr>
-                <th colspan="2">Equity Bonus</th>
-              </tr>
-              <tr>
-                <td>Monthly Equity:</td>
-                <td id="monthlyEquity">0.80%</td>
-              </tr>
-              <tr>
-                <td>Total Equity Multiplier:</td>
-                <td id="equityMultiplier">4.0X</td>
-              </tr>
-              <tr class="total-row">
-                <td>Total Monthly Cash:</td>
-                <td id="totalValue">$8,000</td>
-              </tr>
-            </table>
-
-            <table class="equity-preview-table">
-              <tr>
-                <th colspan="2">Equity by Hours Worked</th>
-              </tr>
-              <tr>
-                <td>10 hrs/week:</td>
                 <td id="equity-10hrs">0.20%</td>
               </tr>
               <tr>
-                <td>20 hrs/week:</td>
+                <td>Normal Priority (10-20 hrs/week):</td>
+                <td>10 hrs/week</td>
                 <td id="equity-20hrs">0.40%</td>
               </tr>
               <tr>
-                <td>30 hrs/week:</td>
+                <td>As Available (20-40 hrs/week):</td>
+                <td>20 hrs/week</td>
                 <td id="equity-30hrs">0.60%</td>
               </tr>
               <tr>
-                <td>40 hrs/week:</td>
+                <td>Total (at 40 hrs/week):</td>
+                <td id="hoursPerMonth">160 hrs/month</td>
                 <td id="equity-40hrs">0.80%</td>
+              </tr>
+
+              <tr>
+                <th colspan="3">Cash Compensation</th>
+              </tr>
+              <tr>
+                <td>Direct Cash (billed end of month):</td>
+                <td colspan="2" id="directCashTotal">$2,000</td>
+              </tr>
+              <tr>
+                <td>Deferred Cash (up to 90 days):</td>
+                <td colspan="2" id="deferredCashTotal">$0</td>
+              </tr>
+              <tr>
+                <td>Total Cash:</td>
+                <td colspan="2" id="totalCash">$2,000</td>
+              </tr>
+
+              <tr>
+                <th colspan="3">Equity Bonus</th>
+              </tr>
+              <tr>
+                <td>Monthly Equity (at 40 hrs/week):</td>
+                <td colspan="2" id="monthlyEquity">0.80%</td>
+              </tr>
+              <tr>
+                <td>Total Equity Multiplier:</td>
+                <td colspan="2" id="equityMultiplier">4.0X</td>
+              </tr>
+              <tr class="total-row">
+                <td>Total Monthly Cash:</td>
+                <td colspan="2" id="totalValue">$8,000</td>
               </tr>
             </table>
           </div>
         </div>
 
         <div class="button-container">
-          <button id="update-contract-btn" onclick="updateContract()">Update Contract</button>
+          <button id="update-contract-btn" onclick="updateContractAndShow()">Show Updated Contract</button>
           <button id="print-btn" onclick="printToPDF()">Print to PDF</button>
         </div>
       </div>
@@ -563,7 +545,7 @@
             <p>(a) <strong>Cash Compensation:</strong> Client will provide Consultant with the following cash compensation:</p>
             <ul>
               <li><strong>Direct Cash:</strong> <span id="contract-direct-cash">$2,000</span> per month, payable upon invoice receipt</li>
-              <li><strong>Deferred Cash:</strong> <span id="contract-deferred-cash">$0</span> per month, payable within 90 days</li>
+              <li><strong>Deferred Cash:</strong> Up to <span id="contract-deferred-cash">$6,000</span> per month based on hours worked (none for 10 hrs/week, increasing with additional hours), payable within 90 days</li>
             </ul>
 
             <p>(b) <strong>Equity Compensation:</strong> Client will provide Consultant with the following equity compensation:</p>
@@ -588,7 +570,7 @@
               <p><strong>Consultant:</strong> David Anderson</p>
               <div class="signature-line">
                 <p>Signature:</p>
-                <img src="@signature.png" alt="David Anderson's Signature" id="consultant-signature" class="signature-image">
+                <img src="signature.png" alt="David Anderson's Signature" id="consultant-signature" class="signature-image">
                 <p>Date: <span id="consultant-date" class="editable" contenteditable="true">January 1, 2025</span></p>
               </div>
             </div>
@@ -990,7 +972,7 @@
 
       // Update compensation values
       document.getElementById('contract-direct-cash').textContent = '$' + formatNumber(directCash);
-      document.getElementById('contract-deferred-cash').textContent = '$' + formatNumber(deferredCash);
+      document.getElementById('contract-deferred-cash').textContent = '$' + formatNumber(maxDeferred40);
       document.getElementById('contract-monthly-equity').textContent = monthlyEquityPercent.toFixed(2) + '%';
 
       // Update equity rate values
@@ -1001,6 +983,18 @@
       // Ensure client name is consistent
       const clientName = document.getElementById('client-name').textContent;
       document.getElementById('client-name-signature').textContent = clientName;
+    }
+
+    // Update contract and show it
+    function updateContractAndShow() {
+      // Update contract values
+      updateContract();
+
+      // Switch to contract tab
+      switchTab('contract');
+
+      // Scroll to contract
+      document.getElementById('contract').scrollIntoView({ behavior: 'smooth' });
     }
 
     // Initialize signature canvas

@@ -58,11 +58,11 @@
     @media (min-width: 1024px) {
       #calculator {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         grid-gap: 20px;
         grid-template-areas:
-          "comp time"
-          "results results";
+          "cash equity time"
+          "results results results";
       }
       .calculator-section {
         margin-bottom: 0;
@@ -71,8 +71,11 @@
         border: 1px solid #eee;
         border-radius: 8px;
       }
-      .comp-section {
-        grid-area: comp;
+      .cash-section {
+        grid-area: cash;
+      }
+      .equity-section {
+        grid-area: equity;
       }
       .time-section {
         grid-area: time;
@@ -324,8 +327,9 @@
     @media print {
       body {
         background-color: white;
+        margin: 20mm 10mm; /* Add margin for printing */
       }
-      .tab-container, .calculator-section, .button-container, footer {
+      h1, .tab-container, .calculator-section, .button-container, footer {
         display: none;
       }
       .tab-content {
@@ -356,10 +360,9 @@
     </div>
 
     <div id="calculator" class="tab-content active">
-      <div class="calculator-section comp-section">
-        <h2>Compensation & Equity Parameters</h2>
+      <div class="calculator-section cash-section">
+        <h2>Cash Compensation</h2>
         <div class="control-group">
-          <h3>Cash Compensation</h3>
           <div class="slider-container">
             <label>Direct Cash: $<span id="directCashValue">2000</span>/month</label>
             <input type="range" min="2000" max="8000" value="2000" step="1000" id="directCashSlider" class="slider">
@@ -369,8 +372,12 @@
             <label>Deferred Cash: $<span id="deferredCashValue">0</span>/month</label>
             <input type="range" min="0" max="6000" value="0" step="1000" id="deferredCashSlider" class="slider">
           </div>
+        </div>
+      </div>
 
-          <h3>Equity Parameters</h3>
+      <div class="calculator-section equity-section">
+        <h2>Equity Parameters</h2>
+        <div class="control-group">
           <div class="slider-container">
             <label>Base Equity Rate: <span id="baseEquityValue">0.20</span>% per month</label>
             <input type="range" min="0.1" max="0.25" value="0.20" step="0.01" id="baseEquitySlider" class="slider">
@@ -627,7 +634,8 @@
             </div>
 
             <div class="signature-block">
-              <p><strong>Client:</strong> <span id="client-name-signature" class="editable" contenteditable="true">Client Name</span></p>
+              <p><strong>Client:</strong> <span id="client-name-signature" class="editable" contenteditable="true">Softgen Labs Inc</span></p>
+              <p><strong>By:</strong> <span id="client-representative" class="editable" contenteditable="true">Kerstin Erickson</span></p>
               <div class="signature-line">
                 <p>Signature:</p>
                 <div id="signature-area">
@@ -648,7 +656,7 @@
   </div>
 
   <footer style="text-align: center; margin: 30px 0; font-size: 14px; color: #666;">
-    Created by <a href="https://www.augmentcode.com/pricing" target="_blank">David</a> with 🚀 for free with Augment in Cursor for <a href="https://akapug.net" target="_blank">akapug</a>
+    Created with 🚀 by <a href="https://www.augmentcode.com/pricing" target="_blank">Augment</a> for free in Cursor for <a href="https://akapug.net" target="_blank">David</a>
   </footer>
 
   <script>
@@ -715,7 +723,8 @@
 
       // Set default names
       document.getElementById('client-name').textContent = 'Softgen Labs Inc';
-      document.getElementById('client-name-signature').textContent = 'Kerstin Erickson';
+      document.getElementById('client-name-signature').textContent = 'Softgen Labs Inc';
+      document.getElementById('client-representative').textContent = 'Kerstin Erickson';
 
       // Add event listeners
       hoursSlider.addEventListener('input', updateFromHours);

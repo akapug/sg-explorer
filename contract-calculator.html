@@ -194,13 +194,8 @@
       grid-gap: 20px;
     }
 
-    @media (min-width: 768px) {
-      .results-grid {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-    }
-
     .results-box {
+      width: 100%;
       background-color: #f8f9fa;
       border-radius: 8px;
       padding: 15px;
@@ -344,44 +339,6 @@
 
     <div id="calculator" class="tab-content active">
       <div class="calculator-section">
-        <h2>Time Commitment & Priority</h2>
-        <div class="control-group">
-          <p>Contract terms: <strong>Up to 40 hours per week</strong> with the following priority tiers:</p>
-
-          <div class="priority-legend">
-            <div class="priority-item">
-              <div class="priority-color high-priority"></div>
-              <span>High Priority (0-10 hrs)</span>
-            </div>
-            <div class="priority-item">
-              <div class="priority-color normal-priority"></div>
-              <span>Normal Priority (10-20 hrs)</span>
-            </div>
-            <div class="priority-item">
-              <div class="priority-color low-priority"></div>
-              <span>As Available (20-40 hrs)</span>
-            </div>
-          </div>
-
-          <div class="slider-container">
-            <label>Preview Hours per Week: <span id="hoursValue">40</span></label>
-            <input type="range" min="10" max="40" value="40" step="10" id="hoursSlider" class="slider">
-          </div>
-
-          <div class="preset-buttons">
-            <button onclick="setPreset(10)">10 hrs/week</button>
-            <button onclick="setPreset(20)">20 hrs/week</button>
-            <button onclick="setPreset(30)">30 hrs/week</button>
-            <button onclick="setPreset(40)">40 hrs/week</button>
-          </div>
-
-          <!-- Equity preview moved to Results section -->
-        </div>
-
-        <!-- Visualization removed -->
-      </div>
-
-      <div class="calculator-section">
         <h2>Compensation & Equity Parameters</h2>
         <div class="control-group">
           <h3>Cash Compensation</h3>
@@ -413,6 +370,44 @@
 
           <p class="note">Note: Equity parameters cannot be adjusted below values that would result in less than 0.8% total monthly equity at 40 hours/week.</p>
         </div>
+      </div>
+
+      <div class="calculator-section">
+        <h2>Time Commitment Preview</h2>
+        <div class="control-group">
+          <p><strong>Note:</strong> This section is for preview purposes only to see how compensation would scale at different average hours per week. The contract terms remain fixed at <strong>up to 40 hours per week</strong> with the following priority tiers:</p>
+
+          <div class="priority-legend">
+            <div class="priority-item">
+              <div class="priority-color high-priority"></div>
+              <span>High Priority (0-10 hrs)</span>
+            </div>
+            <div class="priority-item">
+              <div class="priority-color normal-priority"></div>
+              <span>Normal Priority (10-20 hrs)</span>
+            </div>
+            <div class="priority-item">
+              <div class="priority-color low-priority"></div>
+              <span>As Available (20-40 hrs)</span>
+            </div>
+          </div>
+
+          <div class="slider-container">
+            <label>Preview Average Hours per Week: <span id="hoursValue">40</span></label>
+            <input type="range" min="10" max="40" value="40" step="10" id="hoursSlider" class="slider">
+          </div>
+
+          <div class="preset-buttons">
+            <button onclick="setPreset(10)">10 hrs/week</button>
+            <button onclick="setPreset(20)">20 hrs/week</button>
+            <button onclick="setPreset(30)">30 hrs/week</button>
+            <button onclick="setPreset(40)">40 hrs/week</button>
+          </div>
+
+          <!-- Equity preview moved to Results section -->
+        </div>
+
+        <!-- Visualization removed -->
       </div>
 
       <div class="calculator-section">

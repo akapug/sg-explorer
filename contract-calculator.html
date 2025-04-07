@@ -53,6 +53,22 @@
       padding-bottom: 20px;
       border-bottom: 1px solid #eee;
     }
+
+    /* Responsive layout for wider screens */
+    @media (min-width: 1024px) {
+      #calculator {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 20px;
+      }
+      .calculator-section {
+        margin-bottom: 0;
+        padding: 20px;
+        border-bottom: none;
+        border: 1px solid #eee;
+        border-radius: 8px;
+      }
+    }
     .control-group {
       background-color: #f8f9fa;
       padding: 15px;
@@ -86,6 +102,34 @@
     .high-priority { background-color: #e74c3c; }
     .normal-priority { background-color: #f39c12; }
     .low-priority { background-color: #3498db; }
+
+    .equity-preview {
+      margin: 15px 0;
+    }
+
+    .equity-preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .equity-preview-table th, .equity-preview-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    .equity-preview-table th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+
+    .note {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 15px;
+      font-style: italic;
+    }
 
     .visualization {
       height: 200px;
@@ -220,6 +264,13 @@
       background-color: #e9ecef;
     }
 
+    .signature-image {
+      max-width: 200px;
+      max-height: 100px;
+      margin: 10px 0;
+      display: block;
+    }
+
     /* Print-specific styles */
     @media print {
       body {
@@ -259,10 +310,7 @@
       <div class="calculator-section">
         <h2>Time Commitment & Priority</h2>
         <div class="control-group">
-          <div class="slider-container">
-            <label>Hours per Week: <span id="hoursValue">10</span></label>
-            <input type="range" min="10" max="40" value="10" step="1" id="hoursSlider" class="slider">
-          </div>
+          <p>Contract terms: <strong>Up to 40 hours per week</strong> with the following priority tiers:</p>
 
           <div class="priority-legend">
             <div class="priority-item">
@@ -279,11 +327,42 @@
             </div>
           </div>
 
+          <div class="slider-container">
+            <label>Preview Hours per Week: <span id="hoursValue">40</span></label>
+            <input type="range" min="10" max="40" value="40" step="10" id="hoursSlider" class="slider">
+          </div>
+
           <div class="preset-buttons">
             <button onclick="setPreset(10)">10 hrs/week</button>
             <button onclick="setPreset(20)">20 hrs/week</button>
             <button onclick="setPreset(30)">30 hrs/week</button>
             <button onclick="setPreset(40)">40 hrs/week</button>
+          </div>
+
+          <div class="equity-preview">
+            <h4>Equity by Hours Worked:</h4>
+            <table class="equity-preview-table">
+              <tr>
+                <th>Hours Tier</th>
+                <th>Monthly Equity</th>
+              </tr>
+              <tr>
+                <td>10 hrs/week</td>
+                <td id="equity-10hrs">0.20%</td>
+              </tr>
+              <tr>
+                <td>20 hrs/week</td>
+                <td id="equity-20hrs">0.40%</td>
+              </tr>
+              <tr>
+                <td>30 hrs/week</td>
+                <td id="equity-30hrs">0.60%</td>
+              </tr>
+              <tr>
+                <td>40 hrs/week</td>
+                <td id="equity-40hrs">0.80%</td>
+              </tr>
+            </table>
           </div>
         </div>
 
@@ -311,24 +390,21 @@
         <h2>Equity Parameters</h2>
         <div class="control-group">
           <div class="slider-container">
-            <label>Company Valuation: $<span id="valuationValue">1,500,000</span></label>
-            <input type="range" min="500000" max="5000000" value="1500000" step="100000" id="valuationSlider" class="slider">
+            <label>Base Equity Rate: <span id="baseEquityValue">0.20</span>% per month</label>
+            <input type="range" min="0.1" max="0.3" value="0.20" step="0.05" id="baseEquitySlider" class="slider">
           </div>
 
           <div class="slider-container">
-            <label>Base Equity Rate: <span id="baseEquityValue">0.25</span>% per month</label>
-            <input type="range" min="0.1" max="0.5" value="0.25" step="0.05" id="baseEquitySlider" class="slider">
+            <label>Hours Equity Rate: <span id="hoursEquityValue">0.20</span>% per 10 hrs</label>
+            <input type="range" min="0.1" max="0.3" value="0.20" step="0.05" id="hoursEquitySlider" class="slider">
           </div>
 
           <div class="slider-container">
-            <label>Hours Equity Rate: <span id="hoursEquityValue">0.25</span>% per 10 hrs</label>
-            <input type="range" min="0.1" max="0.5" value="0.25" step="0.05" id="hoursEquitySlider" class="slider">
+            <label>Deferred Cash Equity Rate: <span id="deferredEquityValue">0.20</span>% per $2k</label>
+            <input type="range" min="0.1" max="0.3" value="0.20" step="0.05" id="deferredEquitySlider" class="slider">
           </div>
 
-          <div class="slider-container">
-            <label>Deferred Cash Equity Rate: <span id="deferredEquityValue">0.25</span>% per $2k</label>
-            <input type="range" min="0.1" max="0.5" value="0.25" step="0.05" id="deferredEquitySlider" class="slider">
-          </div>
+          <p class="note">Note: Equity parameters cannot be adjusted below values that would result in less than 0.8% total monthly equity at 40 hours/week.</p>
         </div>
       </div>
 
@@ -337,31 +413,23 @@
         <div class="results-container">
           <table class="results-table">
             <tr>
-              <th colspan="2">Time & Priority</th>
-            </tr>
-            <tr>
-              <td>Total Hours per Week:</td>
-              <td id="totalHours">10</td>
+              <th colspan="2">Priority Breakdown</th>
             </tr>
             <tr>
               <td>High Priority Hours (0-10):</td>
-              <td id="highPriorityHours">10</td>
+              <td>10 hrs/week</td>
             </tr>
             <tr>
               <td>Normal Priority Hours (10-20):</td>
-              <td id="normalPriorityHours">0</td>
+              <td>10 hrs/week</td>
             </tr>
             <tr>
               <td>As Available Hours (20-40):</td>
-              <td id="lowPriorityHours">0</td>
+              <td>20 hrs/week</td>
             </tr>
             <tr>
               <td>Hours per Month:</td>
-              <td id="hoursPerMonth">40</td>
-            </tr>
-            <tr>
-              <td>Effective Hourly Rate:</td>
-              <td id="hourlyRate">$50.00/hr</td>
+              <td id="hoursPerMonth">160</td>
             </tr>
 
             <tr>
@@ -385,19 +453,15 @@
             </tr>
             <tr>
               <td>Monthly Equity:</td>
-              <td id="monthlyEquity">0.25%</td>
+              <td id="monthlyEquity">0.80%</td>
             </tr>
             <tr>
-              <td>3-Month Equity:</td>
-              <td id="threeMonthEquity">0.75%</td>
-            </tr>
-            <tr>
-              <td>Equity Value:</td>
-              <td id="equityValue">$11,250</td>
+              <td>Total Equity Multiplier:</td>
+              <td id="equityMultiplier">4.0X</td>
             </tr>
             <tr class="total-row">
-              <td>Total Monthly Value:</td>
-              <td id="totalValue">$2,000</td>
+              <td>Total Monthly Cash:</td>
+              <td id="totalValue">$8,000</td>
             </tr>
           </table>
         </div>
@@ -492,9 +556,7 @@
 
             <p>(b) <strong>Equity Compensation:</strong> Client will provide Consultant with the following equity compensation:</p>
             <ul>
-              <li><strong>Monthly Equity:</strong> <span id="contract-monthly-equity">0.25%</span> of the company per month</li>
-              <li><strong>Projected 3-Month Equity:</strong> <span id="contract-three-month-equity">0.75%</span> of the company</li>
-              <li><strong>Company Valuation:</strong> <span id="contract-valuation">$1,500,000</span> (for equity value calculation)</li>
+              <li><strong>Monthly Equity:</strong> <span id="contract-monthly-equity">0.80%</span> of the company per month</li>
             </ul>
 
             <p>(c) <strong>Equity Terms:</strong> Equity will vest monthly with no cliff. The equity percentage is calculated based on:</p>
@@ -513,7 +575,8 @@
             <div class="signature-block">
               <p><strong>Consultant:</strong> David Anderson</p>
               <div class="signature-line">
-                <p>Signature: ____________________________</p>
+                <p>Signature:</p>
+                <img src="signature.png" alt="David Anderson's Signature" id="consultant-signature" class="signature-image">
                 <p>Date: <span id="consultant-date" class="editable" contenteditable="true">January 1, 2025</span></p>
               </div>
             </div>
@@ -584,7 +647,6 @@
       const hoursSlider = document.getElementById('hoursSlider');
       const directCashSlider = document.getElementById('directCashSlider');
       const deferredCashSlider = document.getElementById('deferredCashSlider');
-      const valuationSlider = document.getElementById('valuationSlider');
       const baseEquitySlider = document.getElementById('baseEquitySlider');
       const hoursEquitySlider = document.getElementById('hoursEquitySlider');
       const deferredEquitySlider = document.getElementById('deferredEquitySlider');
@@ -593,16 +655,28 @@
       hoursSlider.addEventListener('input', updateFromHours);
       directCashSlider.addEventListener('input', updateFromDirectCash);
       deferredCashSlider.addEventListener('input', updateFromDeferredCash);
-      valuationSlider.addEventListener('input', updateResults);
-      baseEquitySlider.addEventListener('input', updateResults);
-      hoursEquitySlider.addEventListener('input', updateResults);
-      deferredEquitySlider.addEventListener('input', updateResults);
+      baseEquitySlider.addEventListener('input', function() {
+        validateEquitySliders();
+        updateResults();
+        updateEquityPreview();
+      });
+      hoursEquitySlider.addEventListener('input', function() {
+        validateEquitySliders();
+        updateResults();
+        updateEquityPreview();
+      });
+      deferredEquitySlider.addEventListener('input', function() {
+        validateEquitySliders();
+        updateResults();
+        updateEquityPreview();
+      });
 
       // Initialize signature canvas
       initSignatureCanvas();
 
       // Initial update
       updateFromHours();
+      updateEquityPreview();
     }
 
     // Helper function to format numbers with commas
@@ -628,13 +702,41 @@
       return hours * 4 * 50; // hours/month * $50/hr
     }
 
-    // Update all values when hours slider changes
+    // Update equity preview table
+    function updateEquityPreview() {
+      const baseEquityRate = parseFloat(document.getElementById('baseEquitySlider').value);
+      const hoursEquityRate = parseFloat(document.getElementById('hoursEquitySlider').value);
+      const deferredEquityRate = parseFloat(document.getElementById('deferredEquitySlider').value);
+
+      // Calculate equity for each hour tier
+      const maxDeferred10 = getMaxDeferredCash(10); // 0
+      const maxDeferred20 = getMaxDeferredCash(20); // 2000
+      const maxDeferred30 = getMaxDeferredCash(30); // 4000
+      const maxDeferred40 = getMaxDeferredCash(40); // 6000
+
+      const equity10 = calculateMonthlyEquity(10, maxDeferred10, baseEquityRate, hoursEquityRate, deferredEquityRate);
+      const equity20 = calculateMonthlyEquity(20, maxDeferred20, baseEquityRate, hoursEquityRate, deferredEquityRate);
+      const equity30 = calculateMonthlyEquity(30, maxDeferred30, baseEquityRate, hoursEquityRate, deferredEquityRate);
+      const equity40 = calculateMonthlyEquity(40, maxDeferred40, baseEquityRate, hoursEquityRate, deferredEquityRate);
+
+      // Update the equity preview table
+      document.getElementById('equity-10hrs').textContent = equity10.toFixed(2) + '%';
+      document.getElementById('equity-20hrs').textContent = equity20.toFixed(2) + '%';
+      document.getElementById('equity-30hrs').textContent = equity30.toFixed(2) + '%';
+      document.getElementById('equity-40hrs').textContent = equity40.toFixed(2) + '%';
+    }
+
+    // Update from hours slider (preview only)
     function updateFromHours() {
-      // Round to nearest valid hour value (10, 20, 30, 40)
-      let hours = Math.round(parseFloat(document.getElementById('hoursSlider').value) / 10) * 10;
+      // Get hours value
+      let hours = parseInt(document.getElementById('hoursSlider').value);
+      // Round to nearest 10
+      hours = Math.round(hours / 10) * 10;
       hours = Math.max(10, Math.min(40, hours));
-      document.getElementById('hoursSlider').value = hours;
+
+      // Update displayed value
       document.getElementById('hoursValue').textContent = hours;
+      document.getElementById('hoursSlider').value = hours;
 
       // Calculate minimum total cash required at $50/hr
       const minTotalCash = getMinTotalCash(hours);
@@ -642,13 +744,10 @@
       // Set default values based on hours
       let directCash, deferredCash;
 
-      if (hours <= 10) {
+      if (hours === 10) {
         // 10 hr/week: $2k direct cash, $0 deferred
         directCash = 2000;
         deferredCash = 0;
-
-        // Disable deferred cash slider for 10 hours
-        document.getElementById('deferredCashSlider').disabled = true;
       } else {
         // For other hour levels, set direct cash to $2k and calculate deferred cash
         directCash = 2000;
@@ -662,9 +761,6 @@
         if (directCash + deferredCash < minTotalCash) {
           directCash = minTotalCash - deferredCash;
         }
-
-        // Enable deferred cash slider
-        document.getElementById('deferredCashSlider').disabled = false;
       }
 
       // Update sliders
@@ -677,19 +773,40 @@
       updateResults();
     }
 
+    // Validate equity sliders to ensure minimum total equity
+    function validateEquitySliders() {
+      const baseEquityRate = parseFloat(document.getElementById('baseEquitySlider').value);
+      const hoursEquityRate = parseFloat(document.getElementById('hoursEquitySlider').value);
+      const deferredEquityRate = parseFloat(document.getElementById('deferredEquitySlider').value);
+
+      // Calculate total equity at 40 hours with max deferred cash
+      const maxDeferredCash = getMaxDeferredCash(40);
+      const totalEquity = calculateMonthlyEquity(40, maxDeferredCash, baseEquityRate, hoursEquityRate, deferredEquityRate);
+
+      // If total equity is less than 0.8%, adjust sliders
+      if (totalEquity < 0.8) {
+        // Calculate how much we need to increase
+        const shortfall = 0.8 - totalEquity;
+
+        // Distribute the shortfall equally among the three rates
+        const adjustment = shortfall / 3;
+
+        // Adjust each slider
+        document.getElementById('baseEquitySlider').value = Math.min(0.3, baseEquityRate + adjustment);
+        document.getElementById('hoursEquitySlider').value = Math.min(0.3, hoursEquityRate + adjustment);
+        document.getElementById('deferredEquitySlider').value = Math.min(0.3, deferredEquityRate + adjustment);
+
+        // Update displayed values
+        document.getElementById('baseEquityValue').textContent = document.getElementById('baseEquitySlider').value;
+        document.getElementById('hoursEquityValue').textContent = document.getElementById('hoursEquitySlider').value;
+        document.getElementById('deferredEquityValue').textContent = document.getElementById('deferredEquitySlider').value;
+      }
+    }
+
     // Update all values when direct cash slider changes
     function updateFromDirectCash() {
-      const hours = parseInt(document.getElementById('hoursSlider').value);
-
-      // For 10 hr/week, fix at $2k direct cash, $0 deferred
-      if (hours <= 10) {
-        document.getElementById('directCashSlider').value = 2000;
-        document.getElementById('directCashValue').textContent = '2,000';
-        document.getElementById('deferredCashSlider').value = 0;
-        document.getElementById('deferredCashValue').textContent = '0';
-        updateResults();
-        return;
-      }
+      // Fixed at 40 hours per week
+      const hours = 40;
 
       // Round direct cash to nearest $1000 and enforce min/max
       let directCash = parseInt(document.getElementById('directCashSlider').value);
@@ -727,17 +844,8 @@
 
     // Update all values when deferred cash slider changes
     function updateFromDeferredCash() {
-      const hours = parseInt(document.getElementById('hoursSlider').value);
-
-      // For 10 hr/week, fix at $2k direct cash, $0 deferred
-      if (hours <= 10) {
-        document.getElementById('directCashSlider').value = 2000;
-        document.getElementById('directCashValue').textContent = '2,000';
-        document.getElementById('deferredCashSlider').value = 0;
-        document.getElementById('deferredCashValue').textContent = '0';
-        updateResults();
-        return;
-      }
+      // Fixed at 40 hours per week
+      const hours = 40;
 
       // Round deferred cash to nearest $1000
       let deferredCash = parseInt(document.getElementById('deferredCashSlider').value);
@@ -765,7 +873,7 @@
       updateResults();
     }
 
-    // Set preset hours
+    // Set preset hours for preview
     function setPreset(hours) {
       document.getElementById('hoursSlider').value = hours;
       updateFromHours();
@@ -796,40 +904,26 @@
       const hours = parseInt(document.getElementById('hoursSlider').value);
       const directCash = parseInt(document.getElementById('directCashSlider').value);
       const deferredCash = parseInt(document.getElementById('deferredCashSlider').value);
-      const valuation = parseInt(document.getElementById('valuationSlider').value);
       const baseEquityRate = parseFloat(document.getElementById('baseEquitySlider').value);
       const hoursEquityRate = parseFloat(document.getElementById('hoursEquitySlider').value);
       const deferredEquityRate = parseFloat(document.getElementById('deferredEquitySlider').value);
 
       // Update equity parameter displays
-      document.getElementById('valuationValue').textContent = formatNumber(valuation);
       document.getElementById('baseEquityValue').textContent = baseEquityRate.toFixed(2);
       document.getElementById('hoursEquityValue').textContent = hoursEquityRate.toFixed(2);
       document.getElementById('deferredEquityValue').textContent = deferredEquityRate.toFixed(2);
 
       // Calculate hours breakdown
       const hoursPerMonth = hours * 4;
-      const highPriorityHours = Math.min(hours, 10);
-      const normalPriorityHours = Math.min(Math.max(0, hours - 10), 10);
-      const lowPriorityHours = Math.max(0, hours - 20);
 
       // Calculate equity
       const monthlyEquityPercent = calculateMonthlyEquity(hours, deferredCash, baseEquityRate, hoursEquityRate, deferredEquityRate);
-      const threeMonthEquityPercent = monthlyEquityPercent * 3;
-      const equityValue = calculateEquityValue(monthlyEquityPercent, valuation);
 
-      // Calculate total value and hourly rate
+      // Calculate equity multiplier (compared to base rate)
+      const equityMultiplier = monthlyEquityPercent / baseEquityRate;
+
+      // Calculate total cash
       const totalCash = directCash + deferredCash;
-      const totalValue = totalCash + equityValue;
-      const hourlyRate = totalValue / hoursPerMonth;
-
-      // Update displayed values - Time & Priority
-      document.getElementById('totalHours').textContent = hours;
-      document.getElementById('highPriorityHours').textContent = highPriorityHours;
-      document.getElementById('normalPriorityHours').textContent = normalPriorityHours;
-      document.getElementById('lowPriorityHours').textContent = lowPriorityHours;
-      document.getElementById('hoursPerMonth').textContent = hoursPerMonth;
-      document.getElementById('hourlyRate').textContent = '$' + hourlyRate.toFixed(2) + '/hr';
 
       // Update displayed values - Cash Compensation
       document.getElementById('directCashTotal').textContent = '$' + formatNumber(directCash);
@@ -838,12 +932,11 @@
 
       // Update displayed values - Equity Bonus
       document.getElementById('monthlyEquity').textContent = monthlyEquityPercent.toFixed(2) + '%';
-      document.getElementById('threeMonthEquity').textContent = threeMonthEquityPercent.toFixed(2) + '%';
-      document.getElementById('equityValue').textContent = '$' + formatNumber(Math.round(equityValue));
-      document.getElementById('totalValue').textContent = '$' + formatNumber(Math.round(totalValue));
+      document.getElementById('equityMultiplier').textContent = equityMultiplier.toFixed(1) + 'X';
+      document.getElementById('totalValue').textContent = '$' + formatNumber(totalCash);
 
       // Update visualizations
-      updateVisualizations(hours, directCash, deferredCash, equityValue);
+      updateVisualizations(hours, directCash, deferredCash, 0);
     }
 
     // p5.js setup and draw functions
@@ -980,7 +1073,7 @@
       text('Compensation Breakdown', width/2, 20);
 
       // Calculate total value
-      const totalValue = currentDirectCash + currentDeferredCash + currentEquityValue;
+      const totalValue = currentDirectCash + currentDeferredCash;
 
       // Draw background bar
       fill(220);
@@ -991,7 +1084,6 @@
       const barWidth = width - 100;
       const directCashWidth = (currentDirectCash / totalValue) * barWidth;
       const deferredCashWidth = (currentDeferredCash / totalValue) * barWidth;
-      const equityWidth = (currentEquityValue / totalValue) * barWidth;
 
       // Draw segments
       let currentX = 50;
@@ -1011,27 +1103,13 @@
       // Deferred cash
       if (currentDeferredCash > 0) {
         fill('#f1c40f');
-        rect(currentX, 50, deferredCashWidth, 40, 0);
+        rect(currentX, 50, deferredCashWidth, 40, 0, 5, 5, 0);
         if (deferredCashWidth > 60) {
           fill(50);
           noStroke();
           textAlign(CENTER);
           textSize(12);
           text('$' + formatNumber(currentDeferredCash), currentX + deferredCashWidth/2, 75);
-        }
-        currentX += deferredCashWidth;
-      }
-
-      // Equity value
-      if (currentEquityValue > 0) {
-        fill('#9b59b6');
-        rect(currentX, 50, equityWidth, 40, 0, 5, 5, 0);
-        if (equityWidth > 60) {
-          fill(255);
-          noStroke();
-          textAlign(CENTER);
-          textSize(12);
-          text('$' + formatNumber(Math.round(currentEquityValue)), currentX + equityWidth/2, 75);
         }
       }
 
@@ -1051,12 +1129,6 @@
       fill(50);
       text('Deferred Cash: $' + formatNumber(currentDeferredCash), 275, 122);
 
-      // Equity legend
-      fill('#9b59b6');
-      rect(450, 110, 15, 15, 3);
-      fill(50);
-      text('Equity Value: $' + formatNumber(Math.round(currentEquityValue)), 475, 122);
-
       // Restore context
       compensationCanvas.drawingContext.restore();
     }
@@ -1064,53 +1136,39 @@
     // Update contract with current values
     function updateContract() {
       // Get current values
-      const hours = parseInt(document.getElementById('hoursSlider').value);
       const directCash = parseInt(document.getElementById('directCashSlider').value);
       const deferredCash = parseInt(document.getElementById('deferredCashSlider').value);
-      const valuation = parseInt(document.getElementById('valuationSlider').value);
       const baseEquityRate = parseFloat(document.getElementById('baseEquitySlider').value);
       const hoursEquityRate = parseFloat(document.getElementById('hoursEquitySlider').value);
       const deferredEquityRate = parseFloat(document.getElementById('deferredEquitySlider').value);
 
-      // Calculate equity
-      const monthlyEquityPercent = calculateMonthlyEquity(hours, deferredCash, baseEquityRate, hoursEquityRate, deferredEquityRate);
-      const threeMonthEquityPercent = monthlyEquityPercent * 3;
+      // Calculate equity at 40 hours with max deferred cash
+      const maxDeferred40 = getMaxDeferredCash(40);
+      const monthlyEquityPercent = calculateMonthlyEquity(40, maxDeferred40, baseEquityRate, hoursEquityRate, deferredEquityRate);
 
-      // Update hours commitment
-      document.getElementById('hours-commitment').textContent = `maximum of ${hours} hours per week`;
+      // Update hours commitment - fixed at up to 40 hours per week
+      document.getElementById('hours-commitment').textContent = 'maximum of 40 hours per week';
 
-      // Update priority list
+      // Update priority list - fixed for up to 40 hours
       const priorityList = document.getElementById('priority-list');
       priorityList.innerHTML = '';
 
-      const highPriorityHours = Math.min(hours, 10);
-      const normalPriorityHours = Math.min(Math.max(0, hours - 10), 10);
-      const lowPriorityHours = Math.max(0, hours - 20);
+      const li1 = document.createElement('li');
+      li1.innerHTML = '<strong>High Priority (0-10 hours/week):</strong> Meetings, immediate responses, and critical tasks';
+      priorityList.appendChild(li1);
 
-      if (highPriorityHours > 0) {
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>High Priority (${highPriorityHours} hours/week):</strong> Meetings, immediate responses, and critical tasks`;
-        priorityList.appendChild(li);
-      }
+      const li2 = document.createElement('li');
+      li2.innerHTML = '<strong>Normal Priority (10-20 hours/week):</strong> Regular work and ongoing projects';
+      priorityList.appendChild(li2);
 
-      if (normalPriorityHours > 0) {
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>Normal Priority (${normalPriorityHours} hours/week):</strong> Regular work and ongoing projects`;
-        priorityList.appendChild(li);
-      }
-
-      if (lowPriorityHours > 0) {
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>As Available (${lowPriorityHours} hours/week):</strong> Work that can be completed when other priorities allow`;
-        priorityList.appendChild(li);
-      }
+      const li3 = document.createElement('li');
+      li3.innerHTML = '<strong>As Available (20-40 hours/week):</strong> Work that can be completed when other priorities allow';
+      priorityList.appendChild(li3);
 
       // Update compensation values
       document.getElementById('contract-direct-cash').textContent = '$' + formatNumber(directCash);
       document.getElementById('contract-deferred-cash').textContent = '$' + formatNumber(deferredCash);
       document.getElementById('contract-monthly-equity').textContent = monthlyEquityPercent.toFixed(2) + '%';
-      document.getElementById('contract-three-month-equity').textContent = threeMonthEquityPercent.toFixed(2) + '%';
-      document.getElementById('contract-valuation').textContent = '$' + formatNumber(valuation);
 
       // Update equity rate values
       document.getElementById('contract-base-equity-rate').textContent = baseEquityRate.toFixed(2) + '%';

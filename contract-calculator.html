@@ -75,6 +75,19 @@
       border-radius: 8px;
       margin-bottom: 15px;
     }
+
+    .control-group h3 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+      color: #2c3e50;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+    }
+
+    .control-group h3:first-child {
+      margin-top: 0;
+    }
     .slider-container {
       margin: 15px 0;
     }
@@ -172,15 +185,9 @@
     }
 
     .results-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-gap: 20px;
-    }
-
-    @media (min-width: 768px) {
-      .results-grid {
-        grid-template-columns: 1fr 1fr;
-      }
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
     }
     .total-row td {
       font-weight: bold;
@@ -358,8 +365,9 @@
       </div>
 
       <div class="calculator-section">
-        <h2>Compensation</h2>
+        <h2>Compensation & Equity Parameters</h2>
         <div class="control-group">
+          <h3>Cash Compensation</h3>
           <div class="slider-container">
             <label>Direct Cash: $<span id="directCashValue">2000</span>/month</label>
             <input type="range" min="2000" max="8000" value="2000" step="1000" id="directCashSlider" class="slider">
@@ -369,14 +377,8 @@
             <label>Deferred Cash: $<span id="deferredCashValue">0</span>/month</label>
             <input type="range" min="0" max="6000" value="0" step="1000" id="deferredCashSlider" class="slider">
           </div>
-        </div>
 
-        <!-- Visualization removed -->
-      </div>
-
-      <div class="calculator-section">
-        <h2>Equity Parameters</h2>
-        <div class="control-group">
+          <h3>Equity Parameters</h3>
           <div class="slider-container">
             <label>Base Equity Rate: <span id="baseEquityValue">0.20</span>% per month</label>
             <input type="range" min="0.1" max="0.3" value="0.20" step="0.05" id="baseEquitySlider" class="slider">
@@ -629,9 +631,11 @@
       document.getElementById(tabName).classList.add('active');
       document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
 
-      // If switching to contract tab, update contract with current values
+      // If switching to contract tab, update contract with current values and scroll to top of contract
       if (tabName === 'contract') {
         updateContract();
+        // Scroll to the top of the contract
+        document.querySelector('.contract-header').scrollIntoView({ behavior: 'smooth' });
       }
     }
 
